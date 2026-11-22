@@ -1,0 +1,58 @@
+{
+  "build": "default",
+  "version": "0.1-draft",
+  "note": "既定構成。slot → 採用カード。card が null の役割はカード未作成。device は採用予定の実型番（設計事実として公開する。入手経路などは載せない）。",
+  "assignments": [
+    {
+      "slot": "ALU",
+      "card": null,
+      "parts": [
+        "74x181",
+        "74x181"
+      ],
+      "device": "SN74S181NC"
+    },
+    {
+      "slot": "CLA",
+      "card": null,
+      "parts": [
+        "74x182"
+      ],
+      "device": "SN74S182N"
+    },
+    {
+      "slot": "MUL",
+      "card": null,
+      "parts": [
+        "74x284",
+        "74x285"
+      ],
+      "device": "SN74284N / SN74285N"
+    },
+    {
+      "slot": "RAM",
+      "card": null,
+      "parts": [
+        "74x89",
+        "74x89"
+      ],
+      "device": "SN7489N"
+    },
+    {
+      "slot": "ACC",
+      "card": "reg8_574",
+      "parts": [
+        "74x574"
+      ],
+      "device": "SN74HC574N"
+    },
+    {
+      "slot": "NIXIE",
+      "card": null,
+      "parts": [
+        "74x141"
+      ],
+      "device": "K155ID1"
+    }
+  ]
+}

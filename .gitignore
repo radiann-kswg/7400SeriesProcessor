@@ -1,0 +1,12 @@
+.[tT]emp/
+.[pP]rivate/
+.venv/
+*-backups/
+*.kicad_prl
+*.lck
+~*.lck
+fp-info-cache
+**/__pycache__/
+*.pyc
+*.rpt
+.DS_Store
