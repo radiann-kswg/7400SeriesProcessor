@@ -1,6 +1,6 @@
 # AGENTS.md — 7400SeriesProcessor（全エージェント共通指示）
 
-7400 シリーズ汎用ロジック IC のコレクションを「動作するコレクション」として組み上げる、自作 8bit CPU の設計リポジトリ。
+7400 シリーズ汎用ロジック IC のコレクションを「動作するコレクション」として組み上げる、自作 8bit CPU「7400sCCP8」（7400-series Complete Collection Processor）の設計リポジトリ。
 希少な DIP IC（74x181 / 74x182 / 74x89 / 74x284 / 74x285 / 74x141 など）に CPU の中で実際の役割を与え、
 手持ちの IC を可能な限り多種類使い、新しい型番が手に入ったら構成を差し替えられるようにする。
 
@@ -38,7 +38,7 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 2. **飾りの IC を置かない。** どの IC も、外すと何かの機能が欠けること。層は core / peripheral / panel の 3 つ。
 3. **pinspec の無い型番は回路図に載せない。** ピン情報は `hw/pinspec/` か `collection/pcb-demo/_carrier/pinspec/` の照合済み JSON からだけ取る。照合手順は `collection/CLAUDE.md`（信頼度 85% 未満はユーザー確認）。
 4. **生成物を手で編集しない。** `WIRING.md` / `.kicad_sch` / `svg/` は `card.json` を直して `scripts/gen_card.py` で再生成する。
-5. **論理は 74 シリーズで組む。** 74 以外の IC はプログラム記憶・発振子・電源・高圧に限る（D8）。
+5. **論理は 74 シリーズで組む。** 74 以外の IC はプログラム記憶・発振子・電源・高圧に限る（D8）。マイコンは使わない（D23）。
 6. **ファミリ混在を前提にする。** S / LS / ALS / F / 標準 TTL / HC / HCT が混ざる。TTL 出力を HC 入力で受ける箇所、オープンコレクタ出力、ファンアウトはカードごとにデータシートで確認する。
 7. **高圧を分離する。** ニキシー管の高圧（170 V 級）は表示基板に閉じ込め、ロジック基板へ引き込まない。
 8. `sim/` は Python 標準ライブラリのみで動かす（3.10 以降）。IC モデルを変えたら `python -m unittest discover -s sim/tests -t .` を通す。

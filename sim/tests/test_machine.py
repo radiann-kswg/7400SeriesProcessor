@@ -47,14 +47,14 @@ class TestPrograms(unittest.TestCase):
 
     def test_mul_nixie_demo(self):
         m = run((PROGRAMS / "mul_nixie.asm").read_text(encoding="utf-8"))
-        self.assertEqual(m.nixie_text(), "0143")
+        self.assertEqual(m.nixie_text(), "00000143")
 
     def test_bcd_conversion_all_products(self):
         src = (PROGRAMS / "mul_nixie.asm").read_text(encoding="utf-8")
         for x in range(16):
             for y in range(16):
                 m = run(src.replace("LDI 13", f"LDI {x}").replace("MULI 11", f"MULI {y}"))
-                self.assertEqual(m.nixie_text(), f"{x * y:04d}", (x, y))
+                self.assertEqual(m.nixie_text(), f"{x * y:08d}", (x, y))
 
     def test_errors(self):
         with self.assertRaises(AsmError):
