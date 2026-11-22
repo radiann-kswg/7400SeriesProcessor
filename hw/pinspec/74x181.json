@@ -1,0 +1,129 @@
+{
+  "part": "74x181",
+  "package_pins": 24,
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74S181.PDF",
+    "doc_id": "SDLS136",
+    "revision": "December 1972 - Revised March 1988",
+    "page": "1-4",
+    "table": "DW OR N PACKAGE (TOP VIEW) / PIN NUMBER 表 / Figure 1・Figure 2 の論理記号",
+    "checked": "2026-11-22",
+    "method": "PDF を PNG 化して目視（collection/CLAUDE.md の手順）。パッケージ図・ピン番号対応表・論理記号（アクティブ Low／High の両方）でピン番号が一致",
+    "confidence": 95
+  },
+  "dir_values": [
+    "input",
+    "output",
+    "tri_state",
+    "open_collector",
+    "bidirectional",
+    "nc",
+    "power",
+    "ground"
+  ],
+  "note": "名称はアクティブ High データ（Table 2）の表記。アクティブ Low データ（Table 1）ではデータと F が反転表記になり、7 番が Cn、16 番が Cn+4、15 番が P、17 番が G（いずれも負論理）と呼ばれる。A=B はオープンコレクタ。",
+  "pins": {
+    "1": {
+      "name": "B0",
+      "dir": "input"
+    },
+    "2": {
+      "name": "A0",
+      "dir": "input"
+    },
+    "3": {
+      "name": "S3",
+      "dir": "input"
+    },
+    "4": {
+      "name": "S2",
+      "dir": "input"
+    },
+    "5": {
+      "name": "S1",
+      "dir": "input"
+    },
+    "6": {
+      "name": "S0",
+      "dir": "input"
+    },
+    "7": {
+      "name": "Cn",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "8": {
+      "name": "M",
+      "dir": "input"
+    },
+    "9": {
+      "name": "F0",
+      "dir": "output"
+    },
+    "10": {
+      "name": "F1",
+      "dir": "output"
+    },
+    "11": {
+      "name": "F2",
+      "dir": "output"
+    },
+    "12": {
+      "name": "GND",
+      "dir": "ground"
+    },
+    "13": {
+      "name": "F3",
+      "dir": "output"
+    },
+    "14": {
+      "name": "A=B",
+      "dir": "open_collector"
+    },
+    "15": {
+      "name": "X",
+      "dir": "output"
+    },
+    "16": {
+      "name": "Cn+4",
+      "dir": "output",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "17": {
+      "name": "Y",
+      "dir": "output"
+    },
+    "18": {
+      "name": "B3",
+      "dir": "input"
+    },
+    "19": {
+      "name": "A3",
+      "dir": "input"
+    },
+    "20": {
+      "name": "B2",
+      "dir": "input"
+    },
+    "21": {
+      "name": "A2",
+      "dir": "input"
+    },
+    "22": {
+      "name": "B1",
+      "dir": "input"
+    },
+    "23": {
+      "name": "A1",
+      "dir": "input"
+    },
+    "24": {
+      "name": "VCC",
+      "dir": "power"
+    }
+  }
+}

@@ -58,6 +58,13 @@ class Test74181(unittest.TestCase):
                         cla = ic74182(cn, (out.p, 1, 1, 1), (out.g, 1, 1, 1))
                         self.assertEqual(cla.cnx, out.cn4, (s, a, b, cn))
 
+    def test_magnitude_table(self):
+        """減算モード（S=LHHL）での Cn / Cn+4 と大小関係の表（アクティブ High データ）。"""
+        for a in range(16):
+            for b in range(16):
+                self.assertEqual(ic74181(a, b, 0x6, 0, 1).cn4, 1 if a <= b else 0)   # Cn=H
+                self.assertEqual(ic74181(a, b, 0x6, 0, 0).cn4, 1 if a < b else 0)    # Cn=L
+
     def test_a_equals_b(self):
         for a in range(16):
             for b in range(16):

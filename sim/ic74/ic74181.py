@@ -3,7 +3,10 @@ from __future__ import annotations
 
 from typing import NamedTuple
 
-VERIFIED = False  # 一次資料との照合前
+# 照合済み（2026-11-22）: 機能表（SDLS136 Table 2・アクティブ High データ）と大小比較の表（同 2 頁）。
+# P（15 番）・G（17 番）の個別の論理は論理図と未照合。74x182 の論理式（SDLS206）に通した
+# 桁上げが Cn+4 と一致することをテストで確認している。
+VERIFIED = True
 
 
 class Out181(NamedTuple):

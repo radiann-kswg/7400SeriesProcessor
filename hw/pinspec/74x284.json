@@ -1,0 +1,97 @@
+{
+  "part": "74x284",
+  "package_pins": 16,
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74284,SN74285.pdf",
+    "doc_id": "",
+    "revision": "May 1972 - Revised December 1983",
+    "page": "3-922, 3-923",
+    "table": "J OR N PACKAGE (TOP VIEW) / logic symbols / Figure A",
+    "checked": "2026-11-22",
+    "method": "PDF を PNG 化して目視（collection/CLAUDE.md の手順）。パッケージ図・論理記号・Figure A（4×4 乗算器の接続図）でピン番号とビットの重みが一致",
+    "confidence": 95
+  },
+  "dir_values": [
+    "input",
+    "output",
+    "tri_state",
+    "open_collector",
+    "bidirectional",
+    "nc",
+    "power",
+    "ground"
+  ],
+  "note": "語 1 は 1A（2^0）〜1D（2^3）、語 2 は 2A（2^0）〜2D（2^3）。出力はオープンコレクタで、Y4（2^4）〜Y7（2^7）。GA・GB はどちらも L で出力有効。",
+  "pins": {
+    "1": {
+      "name": "2C",
+      "dir": "input"
+    },
+    "2": {
+      "name": "2B",
+      "dir": "input"
+    },
+    "3": {
+      "name": "2A",
+      "dir": "input"
+    },
+    "4": {
+      "name": "1D",
+      "dir": "input"
+    },
+    "5": {
+      "name": "1A",
+      "dir": "input"
+    },
+    "6": {
+      "name": "1B",
+      "dir": "input"
+    },
+    "7": {
+      "name": "1C",
+      "dir": "input"
+    },
+    "8": {
+      "name": "GND",
+      "dir": "ground"
+    },
+    "9": {
+      "name": "Y7",
+      "dir": "open_collector"
+    },
+    "10": {
+      "name": "Y6",
+      "dir": "open_collector"
+    },
+    "11": {
+      "name": "Y5",
+      "dir": "open_collector"
+    },
+    "12": {
+      "name": "Y4",
+      "dir": "open_collector"
+    },
+    "13": {
+      "name": "GB",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "14": {
+      "name": "GA",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "15": {
+      "name": "2D",
+      "dir": "input"
+    },
+    "16": {
+      "name": "VCC",
+      "dir": "power"
+    }
+  }
+}

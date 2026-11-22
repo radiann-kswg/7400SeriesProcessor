@@ -1,0 +1,121 @@
+{
+  "part": "74x182",
+  "package_pins": 16,
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74S182.pdf",
+    "doc_id": "SDLS206",
+    "revision": "December 1972 - Revised March 1988",
+    "page": "1",
+    "table": "D OR N PACKAGE (TOP VIEW) / PIN DESIGNATIONS / logic symbol",
+    "checked": "2026-11-22",
+    "method": "PDF を PNG 化して目視（collection/CLAUDE.md の手順）。パッケージ図・ピン機能表・論理記号でピン番号が一致",
+    "confidence": 95
+  },
+  "dir_values": [
+    "input",
+    "output",
+    "tri_state",
+    "open_collector",
+    "bidirectional",
+    "nc",
+    "power",
+    "ground"
+  ],
+  "note": "74x181 をアクティブ High データで使う場合、G・P は Y・X、桁上げは負論理（Cn・Cn+x 等がバー付き）に読み替える。接続するピンは同じ。",
+  "pins": {
+    "1": {
+      "name": "G1",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "2": {
+      "name": "P1",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "3": {
+      "name": "G0",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "4": {
+      "name": "P0",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "5": {
+      "name": "G3",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "6": {
+      "name": "P3",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "7": {
+      "name": "P",
+      "dir": "output",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "8": {
+      "name": "GND",
+      "dir": "ground"
+    },
+    "9": {
+      "name": "Cn+z",
+      "dir": "output"
+    },
+    "10": {
+      "name": "G",
+      "dir": "output",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "11": {
+      "name": "Cn+y",
+      "dir": "output"
+    },
+    "12": {
+      "name": "Cn+x",
+      "dir": "output"
+    },
+    "13": {
+      "name": "Cn",
+      "dir": "input"
+    },
+    "14": {
+      "name": "G2",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "15": {
+      "name": "P2",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "16": {
+      "name": "VCC",
+      "dir": "power"
+    }
+  }
+}

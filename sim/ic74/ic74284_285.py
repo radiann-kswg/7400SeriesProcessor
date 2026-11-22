@@ -5,7 +5,9 @@
 """
 from __future__ import annotations
 
-VERIFIED = False  # 一次資料との照合前
+# 照合済み（2026-11-22）: 積とビットの重み（TI TTL データブック 3-922・3-923 頁、Figure A）。
+# イネーブル無効時の出力は、論理記号（L アクティブ 2 入力の AND で EN）とオープンコレクタ出力からの解釈。
+VERIFIED = True
 
 
 def _product(a: int, b: int) -> int:

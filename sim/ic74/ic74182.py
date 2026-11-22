@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import NamedTuple, Sequence
 
-VERIFIED = False  # 一次資料との照合前
+VERIFIED = True  # 照合済み（2026-11-22）: 論理式（SDLS206 1 頁）
 
 
 class Out182(NamedTuple):

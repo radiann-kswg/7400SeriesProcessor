@@ -1,0 +1,109 @@
+{
+  "part": "74x89",
+  "package_pins": 16,
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN7489.pdf",
+    "doc_id": "D1416",
+    "revision": "December 1972 - Revised February 1984",
+    "page": "5-3, 5-4",
+    "table": "J OR N PACKAGE (TOP VIEW) / logic symbol / logic diagram",
+    "checked": "2026-11-22",
+    "method": "PDF を PNG 化して目視（collection/CLAUDE.md の手順）。パッケージ図・論理記号・論理図の 3 か所でピン番号が一致",
+    "confidence": 95
+  },
+  "dir_values": [
+    "input",
+    "output",
+    "tri_state",
+    "open_collector",
+    "bidirectional",
+    "nc",
+    "power",
+    "ground"
+  ],
+  "note": "Q1〜Q4 は記憶内容の反転を出力するオープンコレクタ出力（active_low は反転出力の意味）。",
+  "pins": {
+    "1": {
+      "name": "A0",
+      "dir": "input"
+    },
+    "2": {
+      "name": "ME",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "3": {
+      "name": "WE",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "4": {
+      "name": "D1",
+      "dir": "input"
+    },
+    "5": {
+      "name": "Q1",
+      "dir": "open_collector",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "6": {
+      "name": "D2",
+      "dir": "input"
+    },
+    "7": {
+      "name": "Q2",
+      "dir": "open_collector",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "8": {
+      "name": "GND",
+      "dir": "ground"
+    },
+    "9": {
+      "name": "Q3",
+      "dir": "open_collector",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "10": {
+      "name": "D3",
+      "dir": "input"
+    },
+    "11": {
+      "name": "Q4",
+      "dir": "open_collector",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "12": {
+      "name": "D4",
+      "dir": "input"
+    },
+    "13": {
+      "name": "A3",
+      "dir": "input"
+    },
+    "14": {
+      "name": "A2",
+      "dir": "input"
+    },
+    "15": {
+      "name": "A1",
+      "dir": "input"
+    },
+    "16": {
+      "name": "VCC",
+      "dir": "power"
+    }
+  }
+}

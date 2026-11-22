@@ -1,7 +1,7 @@
 """74x89: 64bit RAM（16 語 × 4bit、反転出力・オープンコレクタ）の動作モデル。"""
 from __future__ import annotations
 
-VERIFIED = False  # 一次資料との照合前
+VERIFIED = True  # 照合済み（2026-11-22）: 機能表（D1416 5-3 頁）
 
 
 class Ic7489:
