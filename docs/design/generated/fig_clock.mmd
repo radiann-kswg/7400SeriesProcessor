@@ -2,6 +2,7 @@ flowchart LR
   PHASE["PHASE<br/>74x74<br/>(clk)"]
   PHDEC["PHDEC<br/>74x139<br/>(clk)"]
   RUNSYNC["RUNSYNC<br/>74x109<br/>(clk)"]
+  LEDPH["LED-PH<br/>74x05<br/>(clk)"]
   CSW["スイッチ（AUTO/MANUAL・STEP・RESET）と速度のボリューム・ジャンパ<br/>(本体)"]
   DEB["DEB<br/>74x132<br/>(clk)"]
   OSC["OSC<br/>74x124<br/>(clk)"]
@@ -17,6 +18,7 @@ flowchart LR
 
   PHASE == "Q1 / Q2" ==> PHDEC
   PHASE == "Q1 / Q2" ==> RUNSYNC
+  PHASE == "Q1 / Q2" ==> LEDPH
   CSW == "CSWIN" ==> DEB
   OSC -- "OSC_OUT" --> DIV
   DIV -- "DIV_OUT" --> DEB
@@ -30,4 +32,4 @@ flowchart LR
   RUNSYNC -- "RUN" --> KSDEB
   DEB -- "RST_n" --> PC
   DEB -- "RST_n" --> FLAGS
-  PHDEC == "PH_R_n / PH_G_n / PH_B_n" ==> PHLED
+  LEDPH == "PH_R_n / PH_G_n" ==> PHLED

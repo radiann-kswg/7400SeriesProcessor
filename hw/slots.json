@@ -322,7 +322,7 @@
       "id": "PHDEC",
       "layer": "core",
       "count": 1,
-      "role": "位相を T0〜T3 に展開し、位相表示 LED も点ける（D29）",
+      "role": "位相を T0〜T3 に展開する（制御用。位相表示 LED は Q1・Q2 からデコードを通さず LEDDRV で点ける。D29）",
       "candidates": [
         "74x139",
         "74x155",
@@ -642,7 +642,7 @@
     {
       "id": "LEDDRV",
       "layer": "panel",
-      "count": 1,
+      "count": 2,
       "role": "LED 駆動（オープンコレクタ）",
       "candidates": [
         "74x03",

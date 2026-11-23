@@ -142,12 +142,12 @@
       "leds": [
         {
           "signals": [
-            "PH_R_n / PH_G_n / PH_B_n"
+            "Q1 / Q2"
           ],
           "count": 1,
           "color": "フルカラー",
-          "driver": "PHDEC",
-          "note": "T0 消灯・T1 赤・T2 緑・T3 青（D29）"
+          "driver": "LEDPH",
+          "note": "赤 = Q1、緑 = Q2、青は使わない。T0 消灯・T1 赤・T2 黄（赤 + 緑）・T3 緑（D29）"
         }
       ]
     },
@@ -480,9 +480,10 @@
       "refs": "PHDEC",
       "part": "74x139",
       "count": 1,
-      "role": "位相 Q1・Q2 を T0〜T3 に展開する。片側は制御用、片側は位相 LED の駆動用（D29）",
+      "role": "位相 Q1・Q2 を T0〜T3 に展開する（制御用）",
       "card": "clk",
-      "lacks": "書き込み・更新ストローブ、位相表示"
+      "lacks": "書き込み・更新ストローブ",
+      "note": "使うのは片側だけ。もう片側はカード設計で使い道を決めるか、入力を固定する"
     },
     {
       "id": "PMA",
@@ -588,6 +589,17 @@
       "lacks": "そのカードの LED 表示",
       "kind": "led_driver",
       "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDPH",
+      "refs": "LED-PH",
+      "part": "74x05",
+      "count": 1,
+      "role": "位相 LED（アノード共通）の駆動。Q1 が H で赤、Q2 が H で緑のカソードを引く（D29）",
+      "card": "clk",
+      "lacks": "位相表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）。オープンコレクタの反転なら他の型番でもよい"
     },
     {
       "id": "KSOSC",
@@ -1050,12 +1062,13 @@
       ],
       "to": [
         "PHDEC",
-        "RUNSYNC"
+        "RUNSYNC",
+        "LEDPH"
       ],
       "fig": "clock",
       "scope": "カード内",
       "deadline": "—",
-      "desc": "位相カウンタ。T0 = 00、T1 = 10、T2 = 11、T3 = 01。RUNSYNC は T3 の終わりを知るのに使う"
+      "desc": "位相カウンタ。T0 = 00、T1 = 10、T2 = 11、T3 = 01。RUNSYNC は T3 の終わりを知るのに使う。LED-PH が位相 LED の赤（Q1）と緑（Q2）を点ける"
     },
     {
       "name": "T0_n / T2_n / T3_n",
@@ -1488,11 +1501,11 @@
       "desc": "リセット。PC = 0、C = 0、Z = 0、位相 = T0、RUN = 停止（D34）。解除後の最初の CK4 で RUN/STOP スイッチの状態を取り込む"
     },
     {
-      "name": "PH_R_n / PH_G_n / PH_B_n",
-      "width": 3,
+      "name": "PH_R_n / PH_G_n",
+      "width": 2,
       "polarity": "負",
       "from": [
-        "PHDEC"
+        "LEDPH"
       ],
       "to": [
         "PHLED"
@@ -1500,7 +1513,7 @@
       "fig": "clock",
       "scope": "カード間",
       "deadline": "—",
-      "desc": "位相表示。T0 消灯、T1 赤、T2 緑、T3 青"
+      "desc": "位相 LED のカソード。PH_R_n = NOT Q1、PH_G_n = NOT Q2。T0 消灯、T1 赤、T2 黄（赤 + 緑）、T3 緑"
     },
     {
       "name": "KROW0..3_n",
