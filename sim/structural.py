@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from . import isa
 from .ic74 import Ic7489, ic74181, ic74182, ic74284, ic74285
+from .machine import Machine
 
 
 def _nand(*x: int) -> int:
@@ -41,10 +42,7 @@ class Structural:
     def z(self) -> int:
         return 1 - self.zq
 
-    def ram_read(self, addr: int) -> int:
-        lo = ~self.ram_lo.eval(addr, 0, me=0, we=1) & 0xF
-        hi = ~self.ram_hi.eval(addr, 0, me=0, we=1) & 0xF
-        return lo | (hi << 4)
+    ram_read = Machine.ram_read                    # データパスの読み出しは命令レベルと同じ
 
     def cycle(self) -> None:
         """T0〜T3 の 1 命令分。"""

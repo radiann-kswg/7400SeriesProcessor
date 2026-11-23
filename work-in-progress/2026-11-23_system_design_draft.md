@@ -97,3 +97,10 @@ grilling の質疑（3 ラウンド・26 問）で確認事項 S1〜S15 をす�
 - 1 色が 2 つの位相で点くので、74x139 の出力（1 位相に 1 本だけ L）では点けられない。clk カードに LED-PH（74x05 を仮置き。オープンコレクタの反転なら型番は問わない）を足し、`slots.json` の LEDDRV を 2 個にした。PHDEC は制御用の片側だけになり、もう片側の扱いはカード設計で決める（`SYSTEM.md` 10 章 5）。
 - `hw/system.json` を直して `scripts/gen_system.py` で再生成（ブロック 53・信号 64・74 シリーズ 60 個・40 種、警告 0）。`fig_clock.svg` は npx の mermaid-cli 11.4.2 とローカルの Chrome で書き出した。再生成で、Collection に 74x93 の pinspec が入ったことも IC 一覧に反映された。
 - 未了: 清書図 `docs/design/images/arch_phase.png`・`arch_leds.png` は旧配色（T2 緑・T3 青）のまま。Claude Design のキャンバスで直して書き出し直す。
+
+## 追記: 2 回目のレビューと対応（同日）
+
+- レビュー: `ponytail-review`（過剰設計）、ディジタル回路の観点（別エージェント。kicad-happy・ERC・真理値表の総当たり・制御の論理式の変異テスト 14 種で検出 13・等価 1）、データ整合性の観点（別エージェント。data:validate-data の手順）。論理の誤りは無し。生成物は正本とバイト一致。
+- 直したバグ: `sim/run.py` で未接続の入力ポートが 00 になっていた（D31 の FF に）。`sim/asm.py` の `.equ` が既存のラベルを黙って上書きし、値の誤りで生の ValueError を出していた。`scripts/role_coverage.py` が 74x 以外の型番で落ち、設定のパスをカレントディレクトリ基準で解決していた。前の 2 件は `sim/tests/test_machine.py` にテストを足した（修正を外すと落ちることを確認）。
+- 削った: `Structural.ram_read`（`Machine.ram_read` を使う）、74284/285 の `_product`、`nixie_digits` の使われない引数、`gen_card.py` の macOS の kicad-cli のパス。
+- 実機のリスク 4 件（T3 の終わりの保持時間、出力ポートのクロックのひげ、6.2 節の負荷の表の漏れ、生成器の検査の抜け）を `SYSTEM.md` 10 章 13〜16 項に追加。

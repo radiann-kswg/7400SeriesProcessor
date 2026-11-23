@@ -63,6 +63,24 @@ class TestPrograms(unittest.TestCase):
             assemble("LD 16")
         with self.assertRaises(AsmError):
             assemble("JMP nowhere")
+        with self.assertRaises(AsmError):                        # ラベルを .equ で上書きしない
+            assemble("start: LDI 1\n.equ start 9\nJMP start")
+        with self.assertRaises(AsmError):
+            assemble(".equ X Y")
+
+    def test_run_cli_unconnected_port_is_ff(self):
+        """sim.run でも未接続の入力ポートは FF（D31）。--in で与えたポートだけ値が変わる。"""
+        import contextlib
+        import io
+        import tempfile
+        from sim.run import main
+        with tempfile.TemporaryDirectory() as d:
+            src = Path(d) / "t.asm"
+            src.write_text("IN 3\nOUT 0\nIN 2\nOUT 1\nHLT", encoding="utf-8")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(main([str(src), "--in", "2=0x12"]), 0)
+        self.assertIn("OUT: FF 12", out.getvalue())
 
 
 if __name__ == "__main__":

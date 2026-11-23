@@ -44,7 +44,12 @@ def assemble(source: str) -> list[int]:
             eq = parts[1].split() if len(parts) > 1 else []
             if len(eq) != 2:
                 raise AsmError(f"{lineno} 行: .equ 名前 値")
-            symbols[eq[0]] = int(eq[1], 0)
+            if eq[0] in symbols:
+                raise AsmError(f"{lineno} 行: シンボル {eq[0]} の重複")
+            try:
+                symbols[eq[0]] = int(eq[1], 0)
+            except ValueError:
+                raise AsmError(f"{lineno} 行: .equ の値 {eq[1]} が数値でない") from None
             continue
         items.append((lineno, mnemonic, args))
 

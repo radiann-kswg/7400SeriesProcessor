@@ -34,8 +34,7 @@ KICAD_PIN_TYPE = {
     "open_collector": "open_collector", "bidirectional": "bidirectional",
     "nc": "no_connect", "power": "power_in", "ground": "power_in",
 }
-DEFAULT_CLI = [r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe",
-               "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"]
+DEFAULT_CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
 _NS = uuid.UUID("7400c0de-0000-4000-8000-000000000000")
 
 
@@ -251,7 +250,7 @@ def write_schematic(card: str, data: dict, comps) -> Path:
 
 # --- kicad-cli --------------------------------------------------------
 def find_cli() -> str | None:
-    for c in (os.environ.get("KICAD_CLI"), shutil.which("kicad-cli"), *DEFAULT_CLI):
+    for c in (os.environ.get("KICAD_CLI"), shutil.which("kicad-cli"), DEFAULT_CLI):
         if c and Path(c).is_file():
             return c
     return None

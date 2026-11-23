@@ -10,19 +10,15 @@ from __future__ import annotations
 VERIFIED = True
 
 
-def _product(a: int, b: int) -> int:
-    return (a & 0xF) * (b & 0xF)
-
-
 def ic74284(a: int, b: int, ga: int = 0, gb: int = 0) -> int:
     """積の上位 4bit（Y7..Y4）を返す。"""
     if ga or gb:
         return 0xF
-    return (_product(a, b) >> 4) & 0xF
+    return ((a & 0xF) * (b & 0xF) >> 4) & 0xF
 
 
 def ic74285(a: int, b: int, ga: int = 0, gb: int = 0) -> int:
     """積の下位 4bit（Y3..Y0）を返す。"""
     if ga or gb:
         return 0xF
-    return _product(a, b) & 0xF
+    return (a & 0xF) * (b & 0xF) & 0xF

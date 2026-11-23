@@ -105,13 +105,13 @@ class Machine:
         return self.cycles
 
     # --- 表示 -------------------------------------------------------
-    def nixie_digits(self, ports: tuple[int, ...] = (0, 1, 2, 3)) -> list[int | None]:
+    def nixie_digits(self) -> list[int | None]:
         """OUT 0〜3 の各ニブル（8 桁分の BCD）を 74x141 に通した結果。添字 0 が最下位桁。"""
         digits: list[int | None] = []
-        for p in ports:
+        for p in range(4):
             digits.append(ic74141(self.out[p] & 0xF))
             digits.append(ic74141((self.out[p] >> 4) & 0xF))
         return digits
 
-    def nixie_text(self, ports: tuple[int, ...] = (0, 1, 2, 3)) -> str:
-        return "".join("_" if d is None else str(d) for d in reversed(self.nixie_digits(ports)))
+    def nixie_text(self) -> str:
+        return "".join("_" if d is None else str(d) for d in reversed(self.nixie_digits()))

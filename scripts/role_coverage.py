@@ -26,7 +26,7 @@ def main() -> int:
     history = args.history
     cfg = ROOT / ".private" / "config.json"
     if history is None and cfg.is_file():
-        history = Path(json.loads(cfg.read_text(encoding="utf-8"))["acquisition_history"])
+        history = ROOT / json.loads(cfg.read_text(encoding="utf-8"))["acquisition_history"]   # 相対パスはリポジトリ基準
     if history is None or not history.is_file():
         print("入手履歴 JSON が見つからない（--history か .private/config.json で指定する）", file=sys.stderr)
         return 2
@@ -43,7 +43,7 @@ def main() -> int:
         have = sorted(set(s["candidates"]) & owned, key=lambda p: int(p[3:]))
         assigned |= set(have)
         print(f"{s['id']:<10}{s['layer']:<12}{len(s['candidates']):>4}{len(have):>6}  {' '.join(p[3:] for p in have)}")
-    rest = sorted(owned - assigned, key=lambda p: int(p[3:]))
+    rest = sorted(owned - assigned, key=lambda p: (not p.startswith("74x"), len(p), p))   # 74x 以外（SRAM など）も落とさない
     print(f"\n手持ち {len(owned)} 種 / 役割候補あり {len(assigned)} 種 / 役割なし {len(rest)} 種 / "
           f"既定構成で採用済み {len(adopted & owned)} 種")
     empty = [s["id"] for s in slots if not set(s["candidates"]) & owned]

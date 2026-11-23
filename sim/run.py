@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     rom = assemble(args.source.read_text(encoding="utf-8"))
-    ports = [0] * 16
+    ports = [0xFF] * 16                       # 未接続のポートは R バスのプルアップで FF（D31）
     for item in args.inputs:
         port, val = item.split("=", 1)
         ports[int(port, 0)] = int(val, 0)
