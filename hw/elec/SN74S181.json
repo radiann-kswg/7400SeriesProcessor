@@ -1,0 +1,165 @@
+{
+  "device": "SN74S181",
+  "part": "74x181",
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74S/SN74S181.PDF",
+    "doc_id": "SDLS136",
+    "revision": "December 1972 - Revised March 1988",
+    "pages": "8-9",
+    "checked": "2026-11-23",
+    "method": "PDF の該当頁を目視（collection/CLAUDE.md の手順）",
+    "confidence": 95,
+    "url": "https://www.ti.com/lit/ds/symlink/sn54s181.pdf",
+    "tables": "recommended operating conditions / electrical characteristics / switching characteristics"
+  },
+  "vcc_V": {
+    "min": 4.75,
+    "nom": 5,
+    "max": 5.25
+  },
+  "input": {
+    "VIH_min_V": 2.0,
+    "VIL_max_V": 0.8,
+    "abs_max_V": 5.5,
+    "IIH_at": "VCC = MAX, VI = 2.5 V",
+    "IIL_at": "VCC = MAX, VI = 0.5 V"
+  },
+  "inputs": [
+    {
+      "pins": [
+        "M"
+      ],
+      "IIH_uA": 50,
+      "IIL_mA": -2
+    },
+    {
+      "pins": [
+        "A0",
+        "A1",
+        "A2",
+        "A3",
+        "B0",
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "IIH_uA": 150,
+      "IIL_mA": -6
+    },
+    {
+      "pins": [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "IIH_uA": 200,
+      "IIL_mA": -8
+    },
+    {
+      "pins": [
+        "Cn"
+      ],
+      "IIH_uA": 250,
+      "IIL_mA": -10
+    }
+  ],
+  "output": {
+    "VOH_min_V": 2.7,
+    "IOH_mA": -1,
+    "VOL_max_V": 0.5,
+    "IOL_mA": 20,
+    "note": "VOH は IOH −1 mA、VOL は IOL 20 mA のとき。A=B（14 番）はオープンコレクタで、VOH 5.5 V のとき IOH 250 µA 以下"
+  },
+  "icc_mA": {
+    "typ": 120,
+    "max": 220
+  },
+  "delay_ns": {
+    "condition": "VCC 5 V、TA 25 °C、CL 15 pF、RL 280 Ω。max は tPLH・tPHL の大きい方。最小値の規定は無い",
+    "paths": [
+      {
+        "from": "Cn",
+        "to": "Cn+4",
+        "typ": 7,
+        "max": 10.5
+      },
+      {
+        "from": "A, B",
+        "to": "Cn+4",
+        "mode": "SUM",
+        "typ": 12.5,
+        "max": 18.5
+      },
+      {
+        "from": "A, B",
+        "to": "Cn+4",
+        "mode": "DIFF",
+        "typ": 15.5,
+        "max": 23
+      },
+      {
+        "from": "Cn",
+        "to": "F",
+        "typ": 7,
+        "max": 12
+      },
+      {
+        "from": "A, B",
+        "to": "Y（G）",
+        "mode": "SUM",
+        "typ": 8,
+        "max": 12
+      },
+      {
+        "from": "A, B",
+        "to": "Y（G）",
+        "mode": "DIFF",
+        "typ": 10.5,
+        "max": 15
+      },
+      {
+        "from": "A, B",
+        "to": "X（P）",
+        "mode": "SUM",
+        "typ": 7.5,
+        "max": 12
+      },
+      {
+        "from": "A, B",
+        "to": "X（P）",
+        "mode": "DIFF",
+        "typ": 10.5,
+        "max": 15
+      },
+      {
+        "from": "Ai, Bi",
+        "to": "Fi",
+        "mode": "SUM",
+        "typ": 11,
+        "max": 16.5
+      },
+      {
+        "from": "Ai, Bi",
+        "to": "Fi",
+        "mode": "DIFF",
+        "typ": 14,
+        "max": 22
+      },
+      {
+        "from": "Ai, Bi",
+        "to": "Fi",
+        "mode": "論理演算",
+        "typ": 14,
+        "max": 22
+      },
+      {
+        "from": "A, B",
+        "to": "A=B",
+        "mode": "DIFF",
+        "typ": 20,
+        "max": 30
+      }
+    ]
+  }
+}

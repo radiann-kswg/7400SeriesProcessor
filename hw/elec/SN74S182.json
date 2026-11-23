@@ -1,0 +1,121 @@
+{
+  "device": "SN74S182",
+  "part": "74x182",
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74S/SN74S182.pdf",
+    "doc_id": "SDLS206",
+    "revision": "December 1972 - Revised March 1988",
+    "pages": "1, 3-4",
+    "checked": "2026-11-23",
+    "method": "PDF の該当頁を目視（collection/CLAUDE.md の手順）",
+    "confidence": 95,
+    "url": "https://www.ti.com/lit/ds/symlink/sn54s182.pdf",
+    "tables": "logic equations / absolute maximum ratings / recommended operating conditions / electrical characteristics / switching characteristics"
+  },
+  "vcc_V": {
+    "min": 4.75,
+    "nom": 5,
+    "max": 5.25
+  },
+  "input": {
+    "VIH_min_V": 2.0,
+    "VIL_max_V": 0.8,
+    "abs_max_V": 5.5,
+    "IIH_at": "VCC = MAX, VI = 2.7 V",
+    "IIL_at": "VCC = MAX, VI = 0.5 V"
+  },
+  "inputs": [
+    {
+      "pins": [
+        "Cn"
+      ],
+      "IIH_uA": 50,
+      "IIL_mA": -2
+    },
+    {
+      "pins": [
+        "P3"
+      ],
+      "IIH_uA": 100,
+      "IIL_mA": -4
+    },
+    {
+      "pins": [
+        "P2"
+      ],
+      "IIH_uA": 150,
+      "IIL_mA": -6
+    },
+    {
+      "pins": [
+        "P0",
+        "P1",
+        "G3"
+      ],
+      "IIH_uA": 200,
+      "IIL_mA": -8
+    },
+    {
+      "pins": [
+        "G0",
+        "G2"
+      ],
+      "IIH_uA": 350,
+      "IIL_mA": -14
+    },
+    {
+      "pins": [
+        "G1"
+      ],
+      "IIH_uA": 400,
+      "IIL_mA": -16
+    }
+  ],
+  "output": {
+    "VOH_min_V": 2.7,
+    "IOH_mA": -1,
+    "VOL_max_V": 0.5,
+    "IOL_mA": 20,
+    "note": "VOH は IOH −1 mA、VOL は IOL 20 mA のとき"
+  },
+  "icc_mA": {
+    "all_outputs_high": {
+      "typ": 35,
+      "max": 70
+    },
+    "all_outputs_low": {
+      "typ": 69,
+      "max": 109
+    }
+  },
+  "delay_ns": {
+    "condition": "VCC 5 V、TA 25 °C、CL 15 pF、RL 280 Ω。max は tPLH・tPHL の大きい方。最小値の規定は無い",
+    "paths": [
+      {
+        "from": "G, P",
+        "to": "Cn+x / Cn+y / Cn+z",
+        "typ": 4.5,
+        "max": 7
+      },
+      {
+        "from": "G, P",
+        "to": "G",
+        "typ": 7,
+        "max": 10.5
+      },
+      {
+        "from": "P",
+        "to": "P",
+        "typ": 6.5,
+        "max": 10
+      },
+      {
+        "from": "Cn",
+        "to": "Cn+x / Cn+y / Cn+z",
+        "typ": 7,
+        "max": 10.5
+      }
+    ]
+  },
+  "logic": "Cn+x = G0 + P0·Cn（アクティブ Low データ）。アクティブ High データの 74x181 と使うときは C̄n+x = Y0·(X0 + C̄n)（同 1 頁）。Cn+x は G0・P0・Cn だけで決まる"
+}
