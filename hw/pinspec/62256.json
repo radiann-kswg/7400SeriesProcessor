@@ -1,0 +1,150 @@
+{
+  "part": "62256",
+  "package_pins": 28,
+  "source": {
+    "doc_id": "AS6C62256 Rev 1.2",
+    "maker": "Alliance Memory",
+    "mpn": "AS6C62256-55PCN",
+    "url": "https://www.alliancememory.com/wp-content/uploads/AS6C62256-23-March-2016-rev1.2.pdf",
+    "revision": "Rev 1.2（2016-03-23）",
+    "page": "2 頁（PIN CONFIGURATION・TRUTH TABLE）、11 頁（ORDERING INFORMATION）",
+    "table": "PIN CONFIGURATION（PDIP/SOP）/ TRUTH TABLE",
+    "checked": "2026-11-23",
+    "method": "PDF を PNG 化して目視（collection/CLAUDE.md の手順）。PDIP のピン図と真理値表で信号名が一致",
+    "confidence": 95
+  },
+  "dir_values": [
+    "input",
+    "output",
+    "tri_state",
+    "open_collector",
+    "bidirectional",
+    "nc",
+    "power",
+    "ground"
+  ],
+  "note": "32K × 8 の CMOS SRAM。DQ0〜DQ7 は双方向（読み出しで 3 ステート出力、書き込みで入力）。PDIP は 600 mil 幅。6264 とは 1 番（A14 / NC）と 26 番（A13 / CE2）だけが違う。",
+  "pins": {
+    "1": {
+      "name": "A14",
+      "dir": "input"
+    },
+    "2": {
+      "name": "A12",
+      "dir": "input"
+    },
+    "3": {
+      "name": "A7",
+      "dir": "input"
+    },
+    "4": {
+      "name": "A6",
+      "dir": "input"
+    },
+    "5": {
+      "name": "A5",
+      "dir": "input"
+    },
+    "6": {
+      "name": "A4",
+      "dir": "input"
+    },
+    "7": {
+      "name": "A3",
+      "dir": "input"
+    },
+    "8": {
+      "name": "A2",
+      "dir": "input"
+    },
+    "9": {
+      "name": "A1",
+      "dir": "input"
+    },
+    "10": {
+      "name": "A0",
+      "dir": "input"
+    },
+    "11": {
+      "name": "DQ0",
+      "dir": "bidirectional"
+    },
+    "12": {
+      "name": "DQ1",
+      "dir": "bidirectional"
+    },
+    "13": {
+      "name": "DQ2",
+      "dir": "bidirectional"
+    },
+    "14": {
+      "name": "VSS",
+      "dir": "ground"
+    },
+    "15": {
+      "name": "DQ3",
+      "dir": "bidirectional"
+    },
+    "16": {
+      "name": "DQ4",
+      "dir": "bidirectional"
+    },
+    "17": {
+      "name": "DQ5",
+      "dir": "bidirectional"
+    },
+    "18": {
+      "name": "DQ6",
+      "dir": "bidirectional"
+    },
+    "19": {
+      "name": "DQ7",
+      "dir": "bidirectional"
+    },
+    "20": {
+      "name": "CE",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "21": {
+      "name": "A10",
+      "dir": "input"
+    },
+    "22": {
+      "name": "OE",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "23": {
+      "name": "A11",
+      "dir": "input"
+    },
+    "24": {
+      "name": "A9",
+      "dir": "input"
+    },
+    "25": {
+      "name": "A8",
+      "dir": "input"
+    },
+    "26": {
+      "name": "A13",
+      "dir": "input"
+    },
+    "27": {
+      "name": "WE",
+      "dir": "input",
+      "attr": [
+        "active_low"
+      ]
+    },
+    "28": {
+      "name": "VCC",
+      "dir": "power"
+    }
+  }
+}

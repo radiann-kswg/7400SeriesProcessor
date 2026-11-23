@@ -1,6 +1,6 @@
 {
   "version": "0.1-draft",
-  "note": "74 シリーズ以外の部品の一覧（D8: プログラム記憶・発振子・電源・高圧に限る）。載せるのは設計上の要件と候補の実型番まで。購入先・価格・購入予定は載せない（AGENTS.md の公開範囲）。status は candidate（候補。一次資料は未照合）→ verified（データシート照合済み）→ adopted（採用）。 キーの書き方は Collection の台帳（PartNumber など）に合わせている。",
+  "note": "74 シリーズ以外の部品の一覧（D8: プログラム記憶・発振子・電源・高圧に限る）。載せるのは設計上の要件と候補の実型番まで。購入先・価格・購入予定は載せない（AGENTS.md の公開範囲）。status は candidate（候補。一次資料は未照合）→ verified（データシート照合済み。照合した値は Verified に書く）→ adopted（採用）。 キーの書き方は Collection の台帳（PartNumber など）に合わせている。",
   "parts": [
     {
       "PartNumber": "62256",
@@ -18,8 +18,19 @@
       "Candidates": [
         "AS6C62256-55PCN"
       ],
-      "Status": "candidate",
-      "Notes": "32K × 8。電源電圧・アクセス時間・データ保持電圧などはメーカーのデータシートで未照合（照合したら出典の DocID・頁を添えて status を verified にする）"
+      "Status": "verified",
+      "Notes": "32K × 8。要件のうち 5 V 単電源・DIP・容量・データ保持は満たす。入力の VIH が 2.4 V なので、TTL 出力（VOH 最小 2.4 V）で直接駆動すると余裕が無い。番地・制御線は CMOS 出力の素子（HCT・ACT など）で駆動する（SYSTEM.md 6.1）。電池で保持する間は CE# を VCC − 0.2 V 以上に保つ回路が要る",
+      "Verified": {
+        "Source": "Alliance Memory AS6C62256 Rev 1.2（2016-03-23）。2〜4 頁・7〜8 頁・11 頁を 2026-11-23 に目視、読み取り信頼度 95%",
+        "Pinspec": "hw/pinspec/62256.json",
+        "Package": "28 ピン 600 mil PDIP（-55PCN: 0〜70 ℃、鉛フリー）",
+        "SupplyVoltage": "2.7〜5.5 V",
+        "Inputs": "VIH 最小 2.4 V・VIL 最大 0.6 V、入力リーク ±1 µA",
+        "Outputs": "VOH 最小 2.4 V（IOH −1 mA）、VOL 最大 0.4 V（IOL 2 mA）",
+        "Timing": "-55: 読み出し tRC・tAA・tACE 55 ns、tOE 30 ns、tOH 10 ns。書き込み tWC 55 ns、tAW・tCW 50 ns、tWP 45 ns、tAS・tWR・tDH 0 ns、tDW 25 ns",
+        "SupplyCurrent": "ICC 代表 15 mA・最大 45 mA（最小サイクル）、ISB1 最大 15 µA（商用温度）",
+        "DataRetention": "VDR 1.5〜5.5 V、保持の条件は CE# ≥ VCC − 0.2 V。IDR 最大 20 µA（VCC 2.0 V）。tCDR 0 ns、復帰 tR = tRC"
+      }
     },
     {
       "PartNumber": "6264",
@@ -33,8 +44,19 @@
       "Candidates": [
         "AS6C6264-55PCN"
       ],
-      "Status": "candidate",
-      "Notes": "8K × 8。62256 とのピン配置の違いを含め、メーカーのデータシートで未照合"
+      "Status": "verified",
+      "Notes": "8K × 8。62256 とは 1 番（NC / A14）と 26 番（CE2 / A13）だけが違う。26 番を「電源正常で H」の信号、1 番を GND にすれば、どちらを挿しても動く（62256 は A13・A14 を固定した番地の範囲を使う）。CE2 を L にすれば保持状態になるので、電池で保持する間のチップ非選択を CE2 側で作れる。入力の VIH 2.4 V の扱いは 62256 と同じ",
+      "Verified": {
+        "Source": "Alliance Memory AS6C6264 v2.0（2017-07）。2〜4 頁・7〜8 頁・11 頁を 2026-11-23 に目視、読み取り信頼度 95%",
+        "Pinspec": "hw/pinspec/6264.json",
+        "Package": "28 ピン 600 mil PDIP（-55PCN: 0〜70 ℃、鉛フリー）",
+        "SupplyVoltage": "2.7〜5.5 V",
+        "Inputs": "VIH 最小 2.4 V・VIL 最大 0.6 V、入力リーク ±1 µA",
+        "Outputs": "VOH 最小 2.4 V（IOH −1 mA）、VOL 最大 0.4 V（IOL 2 mA）",
+        "Timing": "62256 と同じ値（-55）",
+        "SupplyCurrent": "ICC 代表 15 mA・最大 45 mA（最小サイクル）、ISB1 最大 10 µA（商用温度）",
+        "DataRetention": "VDR 1.5〜5.5 V、保持の条件は CE# ≥ VCC − 0.2 V または CE2 ≤ 0.2 V。IDR 最大 10 µA（VCC 1.5 V）。tCDR 0 ns、復帰 tR = tRC"
+      }
     }
   ]
 }
