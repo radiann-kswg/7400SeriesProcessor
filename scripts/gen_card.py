@@ -88,6 +88,8 @@ def check_card(data: dict) -> tuple[list[dict], dict[str, list[str]], list[str]]
     """定義を検証し、(部品リスト, ネット→接続先, 警告) を返す。"""
     comps, nets, dirs, warnings = [], {}, {}, []
     refs = [c["ref"] for c in data["components"]]
+    if data.get("connector"):
+        refs.append(data["connector"]["ref"])
     dup = sorted({r for r in refs if refs.count(r) > 1})
     if dup:
         raise CardError(f"参照名が重複している: {dup}")
