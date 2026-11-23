@@ -13,5 +13,8 @@
 | `arch_phase.png` | クロック位相と位相表示 LED、74x89 の書き込みタイミング | `SYSTEM.md` 5 章 |
 | `arch_boards.png` | 基板の構成（本体・ローダ基板・io 基板と接続口） | `SYSTEM.md` 7.1 節 |
 | `arch_leds.png` | LED 表示の一覧 | `SYSTEM.md` 7.3 節、D39 |
+| `alu8_context.png` | alu8 カードとつながるカード（信号と確定期限） | `hw/cards/alu8/DESIGN.md` 1 章・6 章、`hw/system.json` の signals |
+| `alu8_carry.png` | alu8 の中の桁上げの流れ（U1 → U3 → U2、ピン番号つき） | `hw/cards/alu8/card.json`、`DESIGN.md` 2〜4 章 |
+| `alu8_j1.png` | alu8 の接続口 J1（暫定）の並び | `hw/cards/alu8/card.json` の connector、`DESIGN.md` 3 章 |
 
-書き出し: 2026-11-23。`hw/system.json` v0.3（ブロック 53・信号 64・LED 85）に対応。`arch_phase.png`・`arch_leds.png`・`arch_boards.png` は D29 の改訂（位相 LED を Q1 = 赤・Q2 = 緑で点け、T2 黄・T3 緑。駆動は LED-PH）に合わせて同日に書き出し直した。
+書き出し: 2026-11-23。`hw/system.json` v0.3（ブロック 53・信号 64・LED 85）に対応。`arch_phase.png`・`arch_leds.png`・`arch_boards.png` は D29 の改訂（位相 LED を Q1 = 赤・Q2 = 緑で点け、T2 黄・T3 緑。駆動は LED-PH）に合わせて同日に書き出し直した。`alu8_*.png` の 3 枚は同日、`hw/cards/alu8/card.json`（a6a88ae 時点）から作図した。

@@ -117,5 +117,5 @@
       }
     ]
   },
-  "logic": "SDLS206 1 頁の内部論理変数では Cn+x = G0 + P0·Cn（アクティブ Low データ）、アクティブ High データの 74x181 と使うときは C̄n+x = Y0·(X0 + C̄n）。実際のピンレベルでは CNH_n = NOT G_n OR (NOT P_n AND CN_n)（P_n=X0、G_n=Y0、CN_n=C̄n）。Cn+x は G0・P0・Cn だけで決まる"
+  "logic": "SDLS206 1 頁の内部論理変数では Cn+x = G0 + P0·Cn（アクティブ Low データ）、アクティブ High データの 74x181 と使うときは C̄n+x = Y0·(X0 + C̄n）。ピンのレベル（H = 1）では CNH_n = NOT G_n OR (NOT P_n AND CN_n)（P_n・G_n・CN_n は X0・Y0・C̄n の端子につながるネット。レベルをそのまま上の式に入れても成り立たない。hw/cards/alu8/verify.wl で証明）。Cn+x は G0・P0・Cn だけで決まる"
 }
