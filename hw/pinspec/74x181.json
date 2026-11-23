@@ -2,7 +2,7 @@
   "part": "74x181",
   "package_pins": 24,
   "source": {
-    "file": "datasheets/_download/TI(TexasInstruments)/SN74S181.PDF",
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74S/SN74S181.PDF",
     "doc_id": "SDLS136",
     "revision": "December 1972 - Revised March 1988",
     "page": "1-4",
