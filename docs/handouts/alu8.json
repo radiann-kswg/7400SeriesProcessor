@@ -1,0 +1,22 @@
+{
+  "title": "alu8 カード設計資料",
+  "subtitle": "8bit ALU カード（SN74S181 × 2 + SN74S182）— 回路図とアーキテクチャの中の位置づけ",
+  "cover_image": "docs/design/images/alu8_carry.png",
+  "status": "alu8 は draft（DR 待ち）。システム設計は承認済み",
+  "contents": "1・2 章は書き下ろし（2 章の表と節は SYSTEM.md・ARCHITECTURE.md から取り込み）、3〜5 章と付録はリポジトリの DESIGN.md・回路図・WIRING.md・verify.wl・出典表",
+  "note": "正本は hw/cards/alu8/card.json と hw/system.json で、この PDF はその時点の写し。清書図は Claude Design で作図したもので、正本と食い違ったら正本を正とする。",
+  "chapters": [
+    {"num": "1", "title": "この資料について", "md": "docs/handouts/alu8/intro.md", "source_label": "書き下ろし"},
+    {"num": "2", "title": "アーキテクチャの中の alu8", "md": "docs/handouts/alu8/architecture.md",
+     "source_label": "書き下ろし（表と節は docs/design/SYSTEM.md・docs/ARCHITECTURE.md から取り込み）"},
+    {"num": "3", "md": "hw/cards/alu8/DESIGN.md"},
+    {"num": "4", "title": "回路図", "schematic": "hw/cards/alu8/svg/alu8.svg",
+     "source_label": "hw/cards/alu8/svg/alu8.svg（scripts/gen_card.py の生成物）",
+     "note": "KiCad の回路図（描いてある範囲を A3 横に拡大）。PDF は拡大して読めるベクタ。IC の箱は実物の DIP と同じピン並び（左列が 1 番から下へ、右列が下から上へ）。ピンごとの表は 5 章。"},
+    {"num": "5", "md": "hw/cards/alu8/WIRING.md", "source_label": "hw/cards/alu8/WIRING.md（scripts/gen_card.py の生成物）",
+     "figure_before": {"src": "docs/design/images/alu8_j1.png", "caption": "図 5-1　接続口 J1 の並び（暫定。清書図）"}},
+    {"num": "付録 A", "title": "桁上げ先見の形式検証", "code": "hw/cards/alu8/verify.wl"},
+    {"num": "付録 B", "title": "出典", "md": "docs/handouts/alu8/sources.md",
+     "source_label": "書き下ろし（表は docs/design/SYSTEM.md 6.6 節から取り込み）"}
+  ]
+}
