@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import html
+from html.parser import HTMLParser
 import json
 import os
 import re
@@ -22,12 +23,20 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 # 公開リポジトリの資料に載せないもの（AGENTS.md「公開範囲」）
 FORBIDDEN = ('.private/', 'collection/getstarting/', '.temp/')
 INCLUDE_RE = re.compile(r'^<!--\s*include:\s*(.*?)\s*-->[ \t]*$', re.M)
 IMAGE_RE = re.compile(r'!\[([^\]]*)\]\(([^)\s]+)\)')
+IMAGE_REFERENCE_RE = re.compile(r'!\[([^\]]*)\](?:\[([^\]]*)\])?(?!\()')
+REFERENCE_DEF_RE = re.compile(r'^ {0,3}\[([^\]]+)\]:[ \t]*(?:<([^>\n]+)>|(\S+))', re.M)
+UNINSPECTABLE_HTML_IMAGE_RE = re.compile(
+    r'<\s*(?:img|picture|source|iframe|object|embed|svg|video|audio|style|link|input)\b'
+    r'|\s(?:style|srcset|background)\s*=',
+    re.I,
+)
 
 
 class HandoutError(Exception):
@@ -87,7 +96,7 @@ def cells(row: str) -> list[str]:
     return [c.strip() for c in row.strip().strip('|').split('|')]
 
 
-def expand_include(spec: str) -> str:
+def expand_include(spec: str, image_uris: set[str]) -> str:
     args = shlex.split(spec)
     if not args:
         raise HandoutError('include にパスが無い')
@@ -98,7 +107,9 @@ def expand_include(spec: str) -> str:
     unknown = set(opts) - {'section', 'table', 'rows', 'cols', 'lines'}
     if unknown:
         raise HandoutError(f'include の引数が不明: {sorted(unknown)}')
-    body = section_lines(read_text(repo_path(path)).split('\n'), opts.get('section'))
+    source_path = repo_path(path)
+    source = read_text(source_path)
+    body = section_lines(source.split('\n'), opts.get('section'))
     where = f'{path} {opts.get("section", "")}'.strip()
     if 'table' in opts:
         ts = tables(body)
@@ -119,8 +130,8 @@ def expand_include(spec: str) -> str:
         if 'cols' in opts:
             k = int(opts['cols'])
             rows = ['| ' + ' | '.join(cells(r)[:k]) + ' |' for r in rows]
-        return '\n'.join(rows)
-    if 'lines' in opts:
+        selected = '\n'.join(rows)
+    elif 'lines' in opts:
         prefixes = [p for p in opts['lines'].split(';') if p]
         picked = []
         for p in prefixes:
@@ -128,26 +139,83 @@ def expand_include(spec: str) -> str:
             if not hit:
                 raise HandoutError(f'{where}: 「{p}」で始まる行が無い')
             picked += hit
-        return '\n'.join(picked)
-    return '\n'.join(body).strip('\n')
+        selected = '\n'.join(picked)
+    else:
+        selected = '\n'.join(body).strip('\n')
+    return absolutize_images(selected, source_path.parent, source, image_uris)
 
 
-def expand_includes(md: str) -> str:
-    return INCLUDE_RE.sub(lambda m: expand_include(m.group(1)), md)
+def expand_includes(md: str, image_uris: set[str]) -> str:
+    return INCLUDE_RE.sub(lambda m: expand_include(m.group(1), image_uris), md)
 
 
 # ---------- Markdown → HTML ----------
 
-def absolutize_images(md: str, base: Path) -> str:
+def image_uri(src: str, base: Path, image_uris: set[str]) -> str:
+    parsed = urlsplit(src)
+    if parsed.scheme in ('http', 'https'):
+        return src
+    if parsed.scheme and parsed.scheme != 'file':
+        raise HandoutError(f'画像 URI の形式が未対応: {src}')
+    if parsed.scheme == 'file':
+        if parsed.netloc:
+            raise HandoutError(f'ローカル以外の file URI: {src}')
+        p = Path(unquote(parsed.path)).resolve()
+    else:
+        p = (base / unquote(src)).resolve()
+    try:
+        rel = p.relative_to(ROOT).as_posix()
+    except ValueError:
+        raise HandoutError(f'リポジトリの外の画像パス: {src}')
+    checked = repo_path(rel)
+    uri = checked.as_uri()
+    image_uris.add(uri)
+    return uri
+
+
+def absolutize_images(md: str, base: Path, reference_source: str | None = None,
+                      image_uris: set[str] | None = None) -> str:
+    image_uris = image_uris if image_uris is not None else set()
+    if UNINSPECTABLE_HTML_IMAGE_RE.search(md):
+        raise HandoutError('検査できない HTML の画像埋め込みは使えない')
+
+    definitions = {}
+    for match in REFERENCE_DEF_RE.finditer(reference_source if reference_source is not None else md):
+        label = ' '.join(match.group(1).split()).casefold()
+        definitions[label] = match.group(2) or match.group(3)
+
+    def fix_reference(m):
+        alt, label = m.group(1), m.group(2) or m.group(1)
+        target = definitions.get(' '.join(label.split()).casefold())
+        if target is None:
+            return m.group(0)
+        return f'![{alt}]({image_uri(target, base, image_uris)})'
+
+    md = IMAGE_REFERENCE_RE.sub(fix_reference, md)
+
     def fix(m):
         alt, src = m.group(1), m.group(2)
-        if re.match(r'[a-z]+:', src):
-            return m.group(0)
-        p = (base / src).resolve()
-        rel = p.relative_to(ROOT).as_posix()
-        repo_path(rel)
-        return f'![{alt}]({p.as_uri()})'
+        return f'![{alt}]({image_uri(src, base, image_uris)})'
     return IMAGE_RE.sub(fix, md)
+
+
+def validate_html_images(body: str, image_uris: set[str]) -> None:
+    class ImageValidator(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            if tag.lower() == 'img':
+                src = dict(attrs).get('src')
+                if not src:
+                    raise HandoutError('src の無い HTML 画像は使えない')
+                parsed = urlsplit(src)
+                if parsed.scheme in ('http', 'https'):
+                    return
+                if parsed.scheme != 'file' or src not in image_uris:
+                    raise HandoutError(f'検査されていない画像参照: {src}')
+
+        def handle_startendtag(self, tag, attrs):
+            self.handle_starttag(tag, attrs)
+
+    ImageValidator().feed(body)
 
 
 def pandoc(md: str, prefix: str, lua: Path) -> str:
@@ -302,8 +370,10 @@ def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool) 
             if first.startswith('# '):
                 title = title or first[2:].strip()
                 md = rest
-            md = absolutize_images(expand_includes(md), path.parent)
+            image_uris = set()
+            md = absolutize_images(expand_includes(md, image_uris), path.parent, image_uris=image_uris)
             body = pandoc(md, f'c{i}-', lua)
+            validate_html_images(body, image_uris)
         elif kind == 'code':
             body = f'<pre><code>{html.escape(read_text(path).rstrip())}</code></pre>'
         else:
