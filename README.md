@@ -19,9 +19,10 @@
 | `docs/ARCHITECTURE.md` | データパス、スロット構成、命令セット |
 | `docs/DESIGN_DOCS.md` | 回路図と解説（DR 資料）の規格 |
 | `docs/design/` | システム設計（`SYSTEM.md`）、生成された全体図と一覧（`generated/`）、清書図（`images/`） |
+| `docs/handouts/` | 公開用の資料（PDF）の構成と書き下ろしの章。PDF は `scripts/build_handout.py` で組み、DR が済んだ版を Releases に置く |
 | `hw/` | システムの正本（`system.json`）、スロット定義（`slots.json`）、カード定義（`cards/*/card.json`）、構成（`builds/*.json`）、74 シリーズ以外の部品（`parts_non74.json`）、生成された配線表・回路図 |
 | `sim/` | IC 単位の動作モデル、命令レベルエミュレータ、アセンブラ、テスト（Python 標準ライブラリのみ） |
-| `scripts/` | 全体図と一覧の生成（`gen_system.py`）、回路図生成（`gen_card.py`）、役割カバレッジ確認（`role_coverage.py`） |
+| `scripts/` | 全体図と一覧の生成（`gen_system.py`）、回路図生成（`gen_card.py`）、公開用の資料の組版（`build_handout.py`）、役割カバレッジ確認（`role_coverage.py`） |
 | `collection/` | サブモジュール: [7400SeriesCollection](https://github.com/radiann-kswg/7400SeriesCollection)（非公開。チートシート・pinspec・データシート出典） |
 | `structures/` | サブモジュール: [7400SeriesStructures](https://github.com/radiann-kswg/7400SeriesStructures)（回路構造資料） |
 
@@ -42,6 +43,9 @@ python scripts/gen_system.py
 
 # カード定義から配線表と KiCad 回路図を生成（--svg / --erc は kicad-cli が必要）
 python scripts/gen_card.py --all --svg --erc
+
+# 公開用の資料を PDF に組む（pandoc と Chrome か Edge が必要。出力は .temp/handouts/）
+python scripts/build_handout.py alu8
 ```
 
 Windows では `python3` ではなく `python` を使う。

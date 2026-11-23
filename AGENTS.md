@@ -16,7 +16,7 @@
 
 - 共通の指示を変えるときは、このファイルだけを直す。
 - 複数のエージェントが交互に作業する。判断・決定・未了の事項は会話にだけ残さず、`work-in-progress/` の作業ログと該当する DR 資料に書く。作業ログの終わりには「未了」を置く。
-- 清書図（`docs/design/images/`）は Claude Design で作るので、Claude だけが直せる。ほかのエージェントが正本を変えて清書図が古くなったら、作業ログの「未了」に書く。
+- 閲覧用の図面（設計ルール 12）は Claude Design で作るので、Claude だけが直せる。ほかのエージェントは閲覧用の図面を作らない。正本を変えて図面が古くなったら、作業ログの「未了」に書く。
 
 ## 役割
 
@@ -93,13 +93,15 @@ ponytail は Claude Code と Codex ではプラグイン（`ponytail`、`ponytai
 docs/                     要件・アーキテクチャ・DR 資料の規格
 docs/design/              システム階層の DR 資料
 docs/design/generated/    システム階層の生成物（全体図・IC 一覧・信号辞書）
+docs/design/images/       閲覧用の図面（Claude Design で作図して書き出した PNG。設計ルール 12）
+docs/handouts/            公開用の資料（handout）の構成ファイルと書き下ろしの章。PDF は置かない
 hw/system.json            システム階層の正本（ブロックとブロック間の信号）
 hw/slots.json             役割（スロット）定義と候補型番
 hw/cards/<card>/          カード定義 card.json、解説 DESIGN.md、生成物（WIRING.md / .kicad_sch / svg/）
 hw/builds/<build>.json    構成（スロット → 採用カード）
 hw/pinspec/               このリポジトリで照合した pinspec（Collection に無い型番の分）
 sim/                      IC 動作モデル（ic74/）、エミュレータ、アセンブラ、テスト
-scripts/                  gen_system.py（全体図・一覧の生成）、gen_card.py（回路図生成）、role_coverage.py（役割カバレッジ。ローカル専用）
+scripts/                  gen_system.py（全体図・一覧の生成）、gen_card.py（回路図生成）、build_handout.py（handout の PDF 組版）、role_coverage.py（役割カバレッジ。ローカル専用）
 collection/               サブモジュール: 7400SeriesCollection（非公開）
 structures/               サブモジュール: 7400SeriesStructures
 work-in-progress/         作業ログ YYYY-MM-DD_*.md
@@ -118,6 +120,7 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 9. **高圧を分離する。** ニキシー管の高圧（170 V 級）は表示基板に閉じ込め、ロジック基板へ引き込まない。
 10. `sim/` は Python 標準ライブラリのみで動かす（3.10 以降）。IC モデルを変えたら `python -m unittest discover -s sim/tests -t .` を通す。
 11. 命令セットや回路を変えたら、`docs/`・`sim/isa.py`・該当する DR 資料を同じ変更の中で直す。
+12. **閲覧用の図面は Claude Design で作図する。** 回路図（`*.kicad_sch`・`svg/`）と `docs/design/generated/` の図は正本からの生成物で、手で描かない。それとは別に、構造や流れを人が読み取るための図面（アーキテクチャ、カードの中の構造（例: alu8 の桁上げの流れ）、クロック位相、基板の構成、LED 表示など。DR 資料や配布用の PDF に載せる図を含む）は、Claude Design のキャンバスで作図し、`docs/design/images/` に PNG で書き出して、一覧と書き出し日を同じフォルダの `README.md` に書く。Mermaid・手書きの SVG・画像編集で代わりの図面を作らない。図面の内容が正本と食い違ったら正本を正とし、図面を直す。
 
 ## 検証のコマンド
 
@@ -129,6 +132,7 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 | `hw/system.json`・`hw/builds/` | `python3 scripts/gen_system.py` | 警告 0。`docs/design/generated/` に差分が出ない（出たら生成物も同じ変更に含める） |
 | `hw/cards/*/card.json` | `python3 scripts/gen_card.py --all`（ERC は `--erc`。kicad-cli が要る） | 警告 0、ERC 0。生成物に差分が出ない |
 | カードの論理の証明 | `hw/cards/<card>/verify.wl` を Wolfram で評価 | 全項目 True。Wolfram が無い環境では省き、省いたと書く |
+| `docs/handouts/`、handout が取り込む文書 | `python3 scripts/build_handout.py <名前>` | PDF ができる（`include` の見出し・表・行が正本に残っている）。pandoc が無い環境では省き、省いたと書く |
 
 - `collection/` は非公開のサブモジュールで、取得できない環境（クラウドのレビューなど）がある。そのときは Collection の pinspec を使うカード（`reg8_574` など）の生成を省き、`gen_system.py` の IC 一覧の pinspec 欄に出る差分は生成物に含めない。`hw/pinspec/` にある型番だけを使うカードと `sim/` のテストは動く。
 
@@ -139,6 +143,16 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 - 手持ちとの照合は `scripts/role_coverage.py` をローカルで実行し、結果は標準出力で見るだけにする。パスは Git 管理外の `.private/config.json` に置く。
 - 74 シリーズ以外の部品は、要件と候補の実型番を `hw/parts_non74.json` に、購入先と購入予定を Git 管理外の `.private/purchase_plan_non74.json` に分けて書く。7400 シリーズ IC の台帳は `collection/` 側のもので、ここの部品は載せない。
 - データシートの本文・図表は転載せず、数値と出典だけを引く。
+
+## 公開用の資料（handout）
+
+DR や紹介に配る PDF は、リポジトリの Markdown・閲覧用の図面・回路図から `scripts/build_handout.py` で組む。書式は `docs/handouts/README.md`。
+
+- 資料ごとに、構成ファイル `docs/handouts/<名前>.json` と、その資料のための書き下ろしの章 `docs/handouts/<名前>/*.md` を置く。ほかの文書の表や節は `<!-- include: ... -->` で組むたびに取り込み、写さない。
+- `python3 scripts/build_handout.py <名前>` で `.temp/handouts/<名前>_<日付>.pdf` を作る。pandoc と Chrome（または Edge）が要る。Python 側は標準ライブラリだけで、pandoc と Chrome は外部コマンドとして呼ぶ（設計ルール 10 の対象は `sim/`、Code Review Rules の依存の項は `scripts/gen_*.py`）。
+- PDF はコミットしない。DR が済んだ版（カードの `status` が `reviewed`）だけを、ユーザーの指示で GitHub Releases に添付する。
+- 載せる図は、閲覧用の図面（設計ルール 12）と生成物の回路図だけ。公開範囲（上の節）を守る。スクリプトは `.private/`・`collection/getstarting/`・`.temp/` のパスを拒む。
+- 正本の見出し・表・行を変えたら、それを取り込む handout が組めるかを `build_handout.py` で確かめる（合わない `include` があると止まる）。pandoc の無い環境では、作業ログの「未了」に書いて、組める環境（Claude の Cowork など）に回す。
 
 ## 作業ルール
 
@@ -160,6 +174,7 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 - `hw/cards/*/WIRING.md`・`*.kicad_sch`・`svg/` と `docs/design/generated/` は生成物。正本（`card.json`・`hw/system.json`・`hw/builds/`）の変更を伴わずに生成物だけが変わっていたら、手で編集したものとして指摘する。正本だけが変わって生成物が古いままのときも指摘する。正しい直し方は、正本を直して `scripts/gen_card.py`・`scripts/gen_system.py` で再生成し、同じ変更に含めること。
 - 命令セットや制御信号を変えたのに、`sim/isa.py`・`docs/design/SYSTEM.md`・`sim/tests/` のどれかが追従していなければ指摘する（設計ルール 11）。
 - `sim/` と `scripts/gen_*.py` に標準ライブラリ以外の依存を足していたら指摘する（kicad-cli の呼び出しは除く）。
+- 閲覧用の図面（設計ルール 12）を Claude Design 以外で足していたら（Mermaid の清書、手書きの SVG、画像編集した PNG）、または `docs/design/images/` の PNG を変えたのに `README.md` の一覧・書き出し日が追従していなければ指摘する。正本の変更で図面が古くなるのに、作業ログの「未了」に書いていないときも指摘する。
 
 ### 一次資料と数値
 
@@ -175,3 +190,4 @@ work-in-progress/         作業ログ YYYY-MM-DD_*.md
 ### 公開範囲
 
 - このリポジトリは public。購入先・入手メモ・購入予定・採用していない手持ちの一覧、`collection/getstarting/` や `.private/` の内容、データシートの本文・図表の転載が入っていたら指摘する。
+- handout の PDF をコミットしていたら指摘する（Releases に添付する）。`docs/handouts/` の書き下ろしの章に、ほかの文書の表や節を写していたら指摘する（`include` で取り込む）。

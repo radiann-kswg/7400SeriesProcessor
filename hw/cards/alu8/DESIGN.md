@@ -2,6 +2,7 @@
 
 > 状態: `draft`（2026-11-23）。カードの中のネットは 7 章の検証まで済み。出力（`F0..7`・`COUT_n`）の負荷の確認は、受け側の rsel・ctrl カードの実型番が決まってから行う（5.3 節）。
 > 配線の事実は [`card.json`](card.json)、ピンごとの表は [`WIRING.md`](WIRING.md)、回路図は [`alu8.kicad_sch`](alu8.kicad_sch) / [`svg/alu8.svg`](svg/alu8.svg)。この文書はピン番号を写さず、それらを指す。
+> 清書図（Claude Design で作図。正本と食い違ったら正本を正とする）: [つながるカード](../../../docs/design/images/alu8_context.png)・[桁上げの流れ](../../../docs/design/images/alu8_carry.png)・[接続口 J1](../../../docs/design/images/alu8_j1.png)。
 
 ## 1. 役割
 
@@ -21,10 +22,13 @@
 
 ### U3: SN74S182
 
-- Cn+x（12 番）だけを使う。SDLS206 1 頁の論理変数で表した式は C̄n+x = Y0 ·（X0 + C̄n）。これは内部論理変数であり、実際のピンレベルでは `P_n` = X0、`G_n` = Y0、`CN_n` = C̄n なので、配線検証に使う式は `CNH_n = NOT G_n OR (NOT P_n AND CN_n)`（X0 = 4 番、Y0 = 3 番、C̄n = 13 番）。
+- Cn+x（12 番）だけを使う。SDLS206 1 頁は、アクティブ High データの 74S181 と組むときの式を論理変数で C̄n+x = Y0 ·（X0 + C̄n）と書いている（X0 = 4 番、Y0 = 3 番、C̄n = 13 番の端子）。`P_n`・`G_n`・`CN_n` がそれぞれ X0・Y0・C̄n の端子につながるという意味で、ピンのレベルをこの式にそのまま入れても成り立たない。
+- ピンのレベル（H = 1）で書いた式は `CNH_n = NOT G_n OR (NOT P_n AND CN_n)`。この式で U2 の Cn を作ると 8bit の 74181 と等価になることを 7 章の `verify.wl` で証明しており、配線の判定はこちらを正とする。
 - Cn+x は G0・P0・Cn の 3 本だけで決まる（同頁の式と 2 頁の論理図）。残りの入力 6 本は出力の Cn+x に効かない。
 
 ## 3. 配線の要点
+
+![alu8 の中の桁上げの流れ](../../../docs/design/images/alu8_carry.png)
 
 | まとまり | つなぎ方 | 理由 |
 |---|---|---|
