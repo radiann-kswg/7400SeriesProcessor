@@ -121,6 +121,17 @@ def check_card(data: dict) -> tuple[list[dict], dict[str, list[str]], list[str]]
             warnings.append(f"コネクタ信号 {sig} はどの IC にも接続されていない")
         nets.setdefault(sig, []).append(f"{data['connector']['ref']}（コネクタ）")
         dirs.setdefault(sig, []).append("connector")
+    resistor_paths = {}
+    for c in comps:
+        d = c["def"]
+        if d.get("kind") == "R":
+            a, b = d["pins"]["1"], d["pins"]["2"]
+            if NC in (a, b):
+                continue
+            resistor_paths.setdefault(a, set()).add(b)
+            resistor_paths.setdefault(b, set()).add(a)
+    driven = set(POWER_NETS.values())
+    driven.update(net for net, d in dirs.items() if any(x in ("output", "connector") for x in d))
     purpose = net_purposes(data)
     for net, ends in sorted(nets.items()):
         if len(ends) == 1:
@@ -132,8 +143,18 @@ def check_card(data: dict) -> tuple[list[dict], dict[str, list[str]], list[str]]
         d = dirs[net]
         if d.count("output") > 1:
             warnings.append(f"ネット {net} にトーテムポール出力が {d.count('output')} 個つながっている")
-        if all(x == "input" for x in d):
-            warnings.append(f"ネット {net} に駆動元が無い（入力だけ）")
+        if "input" in d:
+            reached, pending = set(), [net]
+            while pending:
+                current = pending.pop()
+                if current in reached:
+                    continue
+                reached.add(current)
+                if current in driven:
+                    break
+                pending.extend(resistor_paths.get(current, set()) - reached)
+            if not reached & driven:
+                warnings.append(f"ネット {net} に駆動元が無い（直流経路なし）")
     warnings += [f"用途だけ書かれたネット {n}（どこにもつながっていない）" for n in purpose if n not in nets]
     return comps, nets, warnings
 

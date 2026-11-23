@@ -26,6 +26,7 @@
       "ref": "U1",
       "part": "74x574",
       "device": "SN74ABT574A",
+      "datasheet": "https://www.ti.com/lit/ds/symlink/sn74abt574a.pdf",
       "role": "8bit D フリップフロップ（立ち上がりエッジ、3 ステート出力）",
       "pins": {
         "1": "OE_n",
