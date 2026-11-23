@@ -4,8 +4,9 @@ from __future__ import annotations
 from typing import NamedTuple
 
 # 照合済み（2026-11-22）: 機能表（SDLS136 Table 2・アクティブ High データ）と大小比較の表（同 2 頁）。
-# P（15 番）・G（17 番）の個別の論理は論理図と未照合。74x182 の論理式（SDLS206）に通した
-# 桁上げが Cn+4 と一致することをテストで確認している。
+# P（15 番）・G（17 番）の論理は 2026-11-23 に論理図（同 5 頁）でたどって照合した（読み取り信頼度 90%）:
+# 15 番は各ビットの上段 NOR（NOT gen）の 4 入力 NAND、17 番は下段 NOR（NOT prop）と上段 NOR の
+# AND-OR-INVERT。74x182 の論理式（SDLS206）に通した桁上げが Cn+4 と一致することもテストで確認している。
 VERIFIED = True
 
 

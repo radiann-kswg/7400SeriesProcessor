@@ -5,7 +5,7 @@
   "assignments": [
     {
       "slot": "ALU",
-      "card": null,
+      "card": "alu8",
       "parts": [
         "74x181",
         "74x181"
@@ -14,7 +14,7 @@
     },
     {
       "slot": "CLA",
-      "card": null,
+      "card": "alu8",
       "parts": [
         "74x182"
       ],

@@ -97,6 +97,7 @@ grilling の質疑（3 ラウンド・26 問）で確認事項 S1〜S15 をす�
 - 1 色が 2 つの位相で点くので、74x139 の出力（1 位相に 1 本だけ L）では点けられない。clk カードに LED-PH（74x05 を仮置き。オープンコレクタの反転なら型番は問わない）を足し、`slots.json` の LEDDRV を 2 個にした。PHDEC は制御用の片側だけになり、もう片側の扱いはカード設計で決める（`SYSTEM.md` 10 章 5）。
 - `hw/system.json` を直して `scripts/gen_system.py` で再生成（ブロック 53・信号 64・74 シリーズ 60 個・40 種、警告 0）。`fig_clock.svg` は npx の mermaid-cli 11.4.2 とローカルの Chrome で書き出した。再生成で、Collection に 74x93 の pinspec が入ったことも IC 一覧に反映された。
 - 未了: 清書図 `docs/design/images/arch_phase.png`・`arch_leds.png` は旧配色（T2 緑・T3 青）のまま。Claude Design のキャンバスで直して書き出し直す。
+  - 対応済み（Cowork）: キャンバスの Phase・Leds・Boards（clk カードに 74x05 を追記）を直し、`arch_phase.png`・`arch_leds.png`・`arch_boards.png` を書き出し直した。
 
 ## 追記: 2 回目のレビューと対応（同日）
 
