@@ -1,11 +1,13 @@
-# 7400sCCP8 アーキテクチャ草案（v0.2 / 2026-11-22）
+# 7400sCCP8 アーキテクチャ（v0.3 / 2026-11-23）
 
-> 設計案であり未承認の内容を含む。ピン番号・電気特性はここに書かない（pinspec と `hw/cards/*/WIRING.md` が担当）。
-> IC の機能に関する記述は一般的な機能表の知識に基づくもので、一次資料との照合前（`docs/REQUIREMENTS.md` R1）。
+> 命令セットと全体の考え方は承認済み（D46）。ピン番号・電気特性はここに書かない（pinspec と `hw/cards/*/WIRING.md` が担当）。
+> 希少 5 型番（74x89 / 181 / 182 / 284 / 285）の機能は一次資料と照合済み。ほかの型番の記述は一般的な機能表の知識に基づき、照合はカード設計の段階で行う。
 
 ## 1. 全体像
 
-単一サイクル・ハーバード構成のアキュムレータ機。1 クロックで 1 命令を実行する。
+単一サイクル・ハーバード構成のアキュムレータ機。1 クロック周期（4 位相）で 1 命令を実行する（D30・D46）。
+IC 単位の配線と制御信号は `docs/design/SYSTEM.md` が正本で、この文書は命令セットと全体の考え方を扱う。
+下の図は概念図で、IC 単位の清書図は [`design/images/arch_datapath.png`](design/images/arch_datapath.png)。
 
 ```mermaid
 flowchart LR
@@ -44,12 +46,12 @@ flowchart LR
 
 ## 2. スロットとカード
 
-役割は `hw/slots.json` に 42 個定義している（core 18 / peripheral 18 / panel 6）。
+役割は `hw/slots.json` に 46 個定義している（core 20 / peripheral 18 / panel 8）。
 各役割は機能上の候補型番を持ち、実装は役割カードとして差し替える（`hw/README.md`）。
 
-- core: ALU / CLA / MUL / RAM / REGFILE / ACC / PC / FLAGS / BSEL / RSEL / IDEC / COND / ZDET / GLUE / CLK / CLKDIV / STEP / PMEM
+- core: ALU / CLA / MUL / RAM / ACC / PC / FLAGS / BSEL / RSEL / IDEC / COND / ZDET / GLUE / CLK / CLKDIV / STEP / RUNSYNC / PHASE / PHDEC / PMEM
 - peripheral（I/O ポートに接続）: NIXIE / DISPBUF / SCANOSC / SCANCNT / DIGSEL / SEG7 / OUTPORT / INPORT / SEROUT / SERIN / SHIFTER / FIFO / PARITY / COMPARE / TIMER / SERARITH / IOBUS / IOSEL
-- panel: KEYENC / LOADADDR / LOADDATA / BUSMON / LEDDRV / PANLATCH
+- panel: KEYENC / KEYSCAN / LOADADDR / LOADDATA / LOADBUS / BUSMON / LEDDRV / PANLATCH
 
 周辺装置を I/O ポート（入力 16・出力 16）にぶら下げる形にしておくと、新しい型番は「ポートを 1 つ使う装置カード」として追加でき、core を作り直さずに済む。
 
@@ -67,8 +69,8 @@ flowchart LR
 | A / B | `MULI imm` / `MULM adr` | A ← A[3:0] × src[3:0] | Z |
 | C | `ST adr` | RAM[adr] ← A | — |
 | D | `OUT port` | OUT[port] ← A（port は FN） | — |
-| E | `IN port` | A ← IN[port] | Z |
-| F | `JMP` / `JZ` / `JNZ` / `JC` / `JNC` / `HLT` | FN が条件（0 常時 / 1 Z / 2 NZ / 3 C / 4 NC / F 停止）、OPERAND が飛び先 | — |
+| E | `IN port` | A ← IN[port]（入力ポートが R バスを直接駆動する。D31） | Z |
+| F | `JMP` / `JZ` / `JNZ` / `JC` / `JNC` / `HLT` | FN が条件（0 常時 / 1 Z / 2 NZ / 3 C / 4 NC / 5〜7 予約で分岐しない / 8〜F 停止。HLT は F）、OPERAND が飛び先（D32） | — |
 
 - src は、偶数 OP では OPERAND（即値）、奇数 OP では RAM[OPERAND[3:0]]。
 - FN は 74x181 の S3..S0 にそのまま渡す。74x181 の 16 論理機能・16 算術機能がすべて命令として使える。
@@ -89,11 +91,11 @@ flowchart LR
 
 末尾 `I` が即値、無印が RAM 番地（0〜15）。
 
-## 4. ハードウェア上の論点（Phase 2 で確定）
+## 4. ハードウェア上の論点
 
-- **単一サイクルの成立条件**: プログラムメモリ・RAM の読み出し・ALU・選択回路がすべて組み合わせ回路で、クロックの立ち上がりで A・PC・フラグを更新する。RAM への書き込みパルスはクロックの後半で作る。
-- **ゼロ検出**: 74x181 の A=B 出力は F が全ビット H のときに出るもので、結果 0 の検出には使えない。8bit 比較器（ZDET スロット）で 0 と比較する案を第一候補とする。
-- **RAM の反転出力**: 74x89 は記憶内容の反転を出力する。読み出し側で反転して戻す（A4）。
+- **単一サイクルの成立条件**: プログラムメモリ・RAM の読み出し・ALU・選択回路がすべて組み合わせ回路で、1 命令を 4 位相に分け、T2 で RAM と出力ポートに書き込み、T3 の終わりで A・PC・フラグを更新する（D30。詳細は `docs/design/SYSTEM.md` 5 章）。
+- **ゼロ検出**: 74x181 の A=B 出力は F が全ビット H のときに出るもので、結果 0 の検出には使えない。R バスを 8bit 比較器（ZDET スロット、74x521）で 0 と比較する。
+- **RAM の反転出力**: 74x89 は記憶内容の反転を出力する。RAM カードの中で反転して戻す（A4・D33）。
 - **オープンコレクタ出力**: 74x89・74x284・74x285 の出力はプルアップが必要。値は速度とシンク電流から決める。
 - **乗算結果の経路**: 乗算器の入力は A の下位 4bit と B 入力の下位 4bit。出力を B 入力側へ戻すと組み合わせループになるため、結果選択（RSEL）で A へ直接書き戻す。
 - **右シフト**: 74x181 は右シフトを持たない。シフト装置（SHIFTER スロット）を周辺装置として追加する。

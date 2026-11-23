@@ -21,8 +21,10 @@ JP = 0xF                   # FN = 条件、OPERAND = 飛び先
 F_NOT_A, F_ZERO, F_XOR, F_B, F_AND, F_ONES, F_OR, F_A = 0x0, 0x3, 0x6, 0xA, 0xB, 0xC, 0xE, 0xF
 F_A_ARITH, F_A_MINUS_B, F_A_PLUS_B, F_A_PLUS_A, F_A_MINUS_1 = 0x0, 0x6, 0x9, 0xC, 0xF
 
-# 分岐条件（JP の FN）
+# 分岐条件（JP の FN）。5〜7 は予約（分岐しない）、FN の最上位（IR11）が 1 の 8〜F は停止（D32）
 COND_ALWAYS, COND_Z, COND_NZ, COND_C, COND_NC, COND_HALT = 0x0, 0x1, 0x2, 0x3, 0x4, 0xF
+COND_RESERVED = (0x5, 0x6, 0x7)
+HALT_BIT = 0x8
 
 # 「即値 / メモリ」の対を持つ別名: 名前 -> (即値側 OP, FN)。メモリ側は OP + 1
 PAIRED = {

@@ -1,7 +1,7 @@
 {
   "build": "default",
-  "version": "0.1-draft",
-  "note": "既定構成。slot → 採用カード。card が null の役割はカード未作成。device は採用予定の実型番（設計事実として公開する。入手経路などは載せない）。",
+  "version": "0.2-draft",
+  "note": "既定構成。slot → 採用カードと実型番（実型番の正本。hw/system.json の slot つきブロックはここから引く）。card が null の役割はカード未作成。device は採用予定の実型番（設計事実として公開する。入手経路などは載せない）。card があるときは、そのカード定義の device と一致させる（scripts/gen_system.py が検査する）。",
   "assignments": [
     {
       "slot": "ALU",
@@ -40,11 +40,11 @@
     },
     {
       "slot": "ACC",
-      "card": "reg8_574",
+      "card": null,
       "parts": [
-        "74x574"
+        "74x374"
       ],
-      "device": "SN74HC574N"
+      "device": "SN74ALS374A"
     },
     {
       "slot": "NIXIE",
@@ -54,6 +54,15 @@
       ],
       "device": "K155ID1",
       "note": "74x141 そのものへの換装を前提にカードを設計する（D26）"
+    },
+    {
+      "slot": "OUTPORT",
+      "card": "reg8_574",
+      "parts": [
+        "74x574"
+      ],
+      "device": "SN74ABT574A",
+      "note": "io 基板（D41）"
     }
   ]
 }

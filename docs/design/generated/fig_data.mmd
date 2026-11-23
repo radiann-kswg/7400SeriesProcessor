@@ -1,0 +1,39 @@
+flowchart LR
+  PC["PC-L / PC-H<br/>74x161 x2<br/>(pc)"]
+  PMA["PM-A<br/>74x157 x2<br/>(pmem)"]
+  PMM["PM-M<br/>SRAM x2<br/>(pmem)"]
+  PMB["PM-B<br/>74x244 x2<br/>(pmem)"]
+  LBUF["LBUF-L / LBUF-H<br/>74x245 x2<br/>(loader)"]
+  BSEL["BSEL-L / BSEL-H<br/>74x157 x2<br/>(bsel)"]
+  RAM["RAM-L / RAM-H<br/>74x89 x2<br/>(ram)"]
+  ACC["ACC<br/>74x374<br/>(acc)"]
+  ALU["ALU-L / ALU-H + CLA<br/>74x181 x2 + 74x182<br/>(alu8)"]
+  MUL["MUL-H + MUL-L<br/>74x284 + 74x285<br/>(mul)"]
+  OUTPORT["OUTPORT<br/>74x574<br/>(io)"]
+  RAMB["RAM-B<br/>74x240<br/>(ram)"]
+  RSEL["RSEL-L / RSEL-H<br/>74x257 x2<br/>(rsel)"]
+  ZDET["ZDET<br/>74x521<br/>(rsel)"]
+  INPORT["INPORT<br/>74x244<br/>(io)"]
+
+  PC == "PC0..7" ==> PMA
+  PMA == "PA0..7" ==> PMM
+  PMM == "PD0..15" ==> PMB
+  LBUF == "PD0..15" ==> PMB
+  LBUF == "PD0..15" ==> PMM
+  PMB == "IR0..7" ==> BSEL
+  PMB == "IR0..3 番地" ==> RAM
+  PMB == "IR0..7 飛び先" ==> PC
+  ACC == "A0..7" ==> ALU
+  ACC == "A0..3" ==> MUL
+  ACC == "A0..7 書き込みデータ" ==> RAM
+  ACC == "A0..7" ==> OUTPORT
+  RAM == "RQ0..7_n" ==> RAMB
+  RAMB == "DO0..7" ==> BSEL
+  BSEL == "B0..7" ==> ALU
+  BSEL == "B0..3" ==> MUL
+  ALU == "F0..7" ==> RSEL
+  MUL == "P0..7" ==> RSEL
+  RSEL == "R0..7" ==> ACC
+  RSEL == "R0..7" ==> ZDET
+  INPORT == "R0..7" ==> ACC
+  INPORT == "R0..7" ==> ZDET

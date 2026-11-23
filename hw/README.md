@@ -4,8 +4,11 @@
 
 | ファイル | 内容 |
 |---|---|
+| `system.json` | システム階層の正本。ブロック（IC のまとまり）とブロック間の信号。`python scripts/gen_system.py [--svg]` で `docs/design/generated/` に全体図・IC 一覧・信号辞書を生成する（`--svg` は mermaid-cli の `mmdc` が要る） |
+| `parts_non74.json` | 74 シリーズ以外の部品（プログラム記憶・発振子・電源・高圧）の要件と候補の実型番。購入先は書かない |
 | `slots.json` | 役割（スロット）の定義。層（core / peripheral / panel）、必要数、機能上の候補型番 |
 | `cards/<card>/card.json` | カード（実装）の定義。使う IC、実型番、全ピンの接続ネット、カードコネクタの信号 |
+| `cards/<card>/DESIGN.md` | カードの解説（なぜそうつなぐか、電気計算、検証、目視チェックリスト）。章立ては `docs/DESIGN_DOCS.md` |
 | `builds/<build>.json` | 構成。どのスロットにどのカードを挿すか |
 | `pinspec/<型番>.json` | 一次資料を目視照合したピン情報（Collection の pinspec と同じ書式）。Collection に無い型番の分だけ置く |
 
@@ -38,5 +41,6 @@
 ## 状態
 
 - `reg8_574` は生成工程の実証用カード。コネクタの信号並びは暫定。
-- 74x181 / 74x182 / 74x89 / 74x284 / 74x285 は pinspec 作成済み（`hw/pinspec/`）。カードはカード間インタフェースを決めてから作る。
+- 74x181 / 74x182 / 74x89 / 74x284 / 74x285 は pinspec 作成済み（`hw/pinspec/`）。カードは `docs/design/SYSTEM.md`（システム設計の案）が承認されてから作る。
+- 生成器はまだ IC とコネクタだけを扱う。受動部品（プルアップ抵抗など）、ネットごとの用途、`hw/system.json` の信号とカードのコネクタ信号の突き合わせ、電気特性（`hw/elec/`）による電流・レベルの計算は未対応で、core のカードを書く前に拡張する。
 - 74x141（K155ID1）は一次資料が未入手のため pinspec 未作成（`docs/REQUIREMENTS.md` の R9）。

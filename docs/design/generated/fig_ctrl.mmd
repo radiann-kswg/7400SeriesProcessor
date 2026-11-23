@@ -1,0 +1,40 @@
+flowchart LR
+  PMB["PM-B<br/>74x244 x2<br/>(pmem)"]
+  ALU["ALU-L / ALU-H + CLA<br/>74x181 x2 + 74x182<br/>(alu8)"]
+  COND["COND<br/>74x151<br/>(ctrl)"]
+  PSEL["PSEL-O / PSEL-I<br/>74x138 x2<br/>(io)"]
+  IDEC["IDEC<br/>74x154<br/>(ctrl)"]
+  CSEL["CSEL<br/>74x151<br/>(ctrl)"]
+  BSEL["BSEL-L / BSEL-H<br/>74x157 x2<br/>(bsel)"]
+  GLUE["GLUE<br/>74x00/10/11/30/32 x5<br/>(ctrl)"]
+  PHDEC["PHDEC<br/>74x139<br/>(clk)"]
+  FLAGS["FLAGS<br/>74x74<br/>(ctrl)"]
+  ZDET["ZDET<br/>74x521<br/>(rsel)"]
+  RSEL["RSEL-L / RSEL-H<br/>74x257 x2<br/>(rsel)"]
+  RAM["RAM-L / RAM-H<br/>74x89 x2<br/>(ram)"]
+  ACC["ACC<br/>74x374<br/>(acc)"]
+  PC["PC-L / PC-H<br/>74x161 x2<br/>(pc)"]
+  EXTC["外部条件（予約。未接続時は偽）<br/>(io 基板)"]
+
+  PMB == "IR8..11 = S0..S3" ==> ALU
+  PMB == "IR8..11" ==> COND
+  PMB == "IR8..11" ==> PSEL
+  PMB == "IR12..15" ==> IDEC
+  PMB == "IR13..15" ==> CSEL
+  PMB == "IR12" ==> BSEL
+  IDEC == "Y0_n..Y15_n" ==> GLUE
+  PHDEC == "T0_n / T2_n / T3_n" ==> GLUE
+  GLUE -- "M" --> ALU
+  CSEL -- "CN_n" --> ALU
+  ALU -- "COUT_n" --> FLAGS
+  ZDET -- "ZERO_n" --> FLAGS
+  FLAGS -- "C / C_n / Z / Z_n" --> COND
+  FLAGS -- "C_n" --> CSEL
+  GLUE -- "SEL_MUL / IN" --> RSEL
+  GLUE -- "INRD_n / OSTB_n" --> PSEL
+  GLUE -- "WR_n" --> RAM
+  GLUE -- "ACK" --> ACC
+  GLUE == "CCK / ZCK" ==> FLAGS
+  GLUE -- "PCK / PC_EN" --> PC
+  COND -- "PC_LD_n" --> PC
+  EXTC == "EXTC5..7" ==> COND

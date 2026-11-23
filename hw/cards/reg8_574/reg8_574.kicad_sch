@@ -135,7 +135,7 @@
     (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
     (uuid "0ad2abe8-7e9f-501d-b5fb-e7603ab1ae81")
     (property "Reference" "U1" (at 127 86.36 0) (effects (font (size 1.27 1.27))))
-    (property "Value" "SN74HC574N" (at 127 116.84 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SN74ABT574A" (at 127 116.84 0) (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 127 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (property "Datasheet" "" (at 127 101.6 0) (effects (font (size 1.27 1.27)) hide))
     (pin "1" (uuid "47c35fcb-7196-5bce-9658-f407abe74915"))

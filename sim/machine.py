@@ -1,4 +1,4 @@
-"""命令レベルエミュレータ（単一サイクル・ハーバード構成の草案 v0.1）。
+"""命令レベルエミュレータ（単一サイクル・ハーバード構成。docs/ARCHITECTURE.md v0.3）。
 
 データパスは sim.ic74 の IC モデルを実回路と同じつなぎ方で呼び出して評価する。
 構成（どの役割をどの IC で実装するか）が変わったら、ここの組み立て部分を差し替える。
@@ -21,7 +21,7 @@ class Machine:
         self.ram_lo = Ic7489()
         self.ram_hi = Ic7489()
         self.out = [0] * 16
-        self.in_ports = list(in_ports) if in_ports else [0] * 16
+        self.in_ports = list(in_ports) if in_ports else [0xFF] * 16   # 未接続のポートは R バスのプルアップで FF（D31）
         self.halted = False
         self.cycles = 0
 
@@ -81,7 +81,7 @@ class Machine:
             self.a = self.in_ports[fn] & 0xFF
             self.z = int(self.a == 0)
         else:                                                # JP
-            if fn == isa.COND_HALT:
+            if fn & isa.HALT_BIT:                            # 8〜F は停止（D32）
                 self.halted = True
                 next_pc = self.pc
             else:
@@ -91,9 +91,7 @@ class Machine:
                     isa.COND_NZ: not self.z,
                     isa.COND_C: bool(self.c),
                     isa.COND_NC: not self.c,
-                }.get(fn)
-                if taken is None:
-                    raise RuntimeError(f"未定義の分岐条件 {fn:#x}（PC={self.pc:#04x}）")
+                }.get(fn, False)                             # 5〜7 は予約で分岐しない
                 if taken:
                     next_pc = operand
         self.pc = next_pc

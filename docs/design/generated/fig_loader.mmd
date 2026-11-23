@@ -1,0 +1,36 @@
+flowchart LR
+  LBUF["LBUF-L / LBUF-H<br/>74x245 x2<br/>(loader)"]
+  PMM["PM-M<br/>SRAM x2<br/>(pmem)"]
+  KSROW["KS-ROW<br/>74x156<br/>(loader)"]
+  KEYPAD["16 進キー（4 × 4 行列）<br/>(ローダ基板)"]
+  KSCOL["KS-COL<br/>74x153<br/>(loader)"]
+  KSOSC["KS-OSC<br/>74x14<br/>(loader)"]
+  KSCNT["KS-CNT<br/>74x93<br/>(loader)"]
+  KSDEB["KS-DEB<br/>74x221<br/>(loader)"]
+  LDATA["LDATA-L / LDATA-H<br/>74x273 x2<br/>(loader)"]
+  FKEYS["機能キー（AS・WI・RI・RD）<br/>(ローダ基板)"]
+  LADDR["LADDR-L / LADDR-H<br/>74x193 x2<br/>(loader)"]
+  LGLUE["LGLUE<br/>74x00<br/>(loader)"]
+  PMA["PM-A<br/>74x157 x2<br/>(pmem)"]
+  LSW["スイッチ（RUN/STOP・WRITE/READ）<br/>(ローダ基板)"]
+
+  LBUF == "PD0..15" ==> PMM
+  KSROW == "KROW0..3_n" ==> KEYPAD
+  KEYPAD == "KCOL0..3_n" ==> KSCOL
+  KSOSC -- "KSCLK" --> KSCNT
+  KSOSC -- "KSCLK" --> KSDEB
+  KSCNT == "KD2..3 行" ==> KSROW
+  KSCNT == "KD0..1 列" ==> KSCOL
+  KSCNT == "KD0..3" ==> LDATA
+  KSCOL -- "KHIT_n" --> KSCNT
+  KSCOL -- "KHIT_n" --> KSDEB
+  KSDEB -- "KSTB" --> LDATA
+  FKEYS == "FKEY" ==> KSOSC
+  KSOSC == "AS_n / UP / DN" ==> LADDR
+  KSOSC -- "WI_n" --> LGLUE
+  LDATA == "LD0..15" ==> LBUF
+  LDATA == "LD0..7 番地設定の値" ==> LADDR
+  LADDR == "LA0..7" ==> PMA
+  LSW -- "WRITE" --> LGLUE
+  LGLUE -- "PWE_n / LOE_n" --> PMM
+  LGLUE -- "LOE_n" --> LBUF

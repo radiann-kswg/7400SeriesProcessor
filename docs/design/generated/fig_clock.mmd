@@ -1,0 +1,33 @@
+flowchart LR
+  PHASE["PHASE<br/>74x74<br/>(clk)"]
+  PHDEC["PHDEC<br/>74x139<br/>(clk)"]
+  RUNSYNC["RUNSYNC<br/>74x109<br/>(clk)"]
+  CSW["スイッチ（AUTO/MANUAL・STEP・RESET）と速度のボリューム・ジャンパ<br/>(本体)"]
+  DEB["DEB<br/>74x132<br/>(clk)"]
+  OSC["OSC<br/>74x124<br/>(clk)"]
+  DIV["DIV<br/>74x393<br/>(clk)"]
+  LSW["スイッチ（RUN/STOP・WRITE/READ）<br/>(ローダ基板)"]
+  PMA["PM-A<br/>74x157 x2<br/>(pmem)"]
+  LGLUE["LGLUE<br/>74x00<br/>(loader)"]
+  KSOSC["KS-OSC<br/>74x14<br/>(loader)"]
+  KSDEB["KS-DEB<br/>74x221<br/>(loader)"]
+  PC["PC-L / PC-H<br/>74x161 x2<br/>(pc)"]
+  FLAGS["FLAGS<br/>74x74<br/>(ctrl)"]
+  PHLED["位相表示 LED（フルカラー）<br/>(本体)"]
+
+  PHASE == "Q1 / Q2" ==> PHDEC
+  PHASE == "Q1 / Q2" ==> RUNSYNC
+  CSW == "CSWIN" ==> DEB
+  OSC -- "OSC_OUT" --> DIV
+  DIV -- "DIV_OUT" --> DEB
+  DEB -- "CK4 / RST_n" --> PHASE
+  DEB -- "CK4 / RST_n" --> RUNSYNC
+  LSW -- "RUN_SW" --> RUNSYNC
+  RUNSYNC -- "RUN" --> PHASE
+  RUNSYNC -- "RUN" --> PMA
+  RUNSYNC -- "RUN" --> LGLUE
+  RUNSYNC -- "RUN" --> KSOSC
+  RUNSYNC -- "RUN" --> KSDEB
+  DEB -- "RST_n" --> PC
+  DEB -- "RST_n" --> FLAGS
+  PHDEC == "PH_R_n / PH_G_n / PH_B_n" ==> PHLED

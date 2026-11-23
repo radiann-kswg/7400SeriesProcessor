@@ -1,0 +1,1791 @@
+{
+  "version": "0.3-draft",
+  "note": "システム階層の正本。基板・カード・ブロック（IC のまとまり）とブロック間の信号を書く。scripts/gen_system.py が docs/design/generated/ に全体図・IC 一覧・基板とカード・LED 一覧・接続口の信号数・信号辞書を生成する。解説は docs/design/SYSTEM.md。blocks の card は「どの役割カードの位置に載るか」で、そこに挿す実装（hw/cards/ のカード定義）と実型番は hw/builds/default.json が決める。slot を持つブロックの実型番は builds から引き、ここには書かない。fig_extra は、別の図に属する信号のうち、その図にも描く受け先を指定する。kind が led_driver のブロックは LED を点けるためのバッファで、図には描かず cards の leds から参照する。",
+  "power": {
+    "input": "DC ジャック + 5 V の AC アダプタ（D43）",
+    "rail": "5 V 単電源",
+    "note": "アダプタの容量は全素子の消費電流を照合してから決める。見積もりは docs/design/SYSTEM.md の 6.3〜6.5 節"
+  },
+  "boards": [
+    {
+      "id": "main",
+      "title": "本体",
+      "note": "マザーボードに core の役割カード 10 枚を平置きで挿す（D6・D14・D28）。拡張ポートとローダ接続口を持つ"
+    },
+    {
+      "id": "loader",
+      "title": "ローダ基板",
+      "note": "TTM8 のプログラムボードにならう別基板。本体とボックスヘッダ + リボンケーブルでつなぐ（D40）"
+    },
+    {
+      "id": "io",
+      "title": "io 基板",
+      "note": "本体の拡張ポートにつなぐ外付け基板。出力ポート 1 個と入力ポート 1 個（D41）。次の基板を数珠つなぎにできる"
+    }
+  ],
+  "cards": [
+    {
+      "id": "alu8",
+      "title": "ALU",
+      "board": "main",
+      "layer": "core",
+      "leds": []
+    },
+    {
+      "id": "mul",
+      "title": "乗算器",
+      "board": "main",
+      "layer": "core",
+      "leds": []
+    },
+    {
+      "id": "ram",
+      "title": "データ RAM",
+      "board": "main",
+      "layer": "core",
+      "leds": []
+    },
+    {
+      "id": "acc",
+      "title": "A レジスタ",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "A0..7"
+          ],
+          "count": 8,
+          "color": "黄",
+          "driver": "LEDA"
+        }
+      ]
+    },
+    {
+      "id": "bsel",
+      "title": "B 入力選択",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "B0..7"
+          ],
+          "count": 8,
+          "color": "黄",
+          "driver": "LEDB"
+        }
+      ]
+    },
+    {
+      "id": "rsel",
+      "title": "結果選択と 0 検出",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "R0..7"
+          ],
+          "count": 8,
+          "color": "黄",
+          "driver": "LEDR"
+        }
+      ]
+    },
+    {
+      "id": "ctrl",
+      "title": "制御",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "M",
+            "CN_n",
+            "SEL_MUL",
+            "IN",
+            "WR_n",
+            "A_LD / C_LD / Z_LD"
+          ],
+          "count": 8,
+          "color": "赤",
+          "driver": "LEDCTL"
+        },
+        {
+          "signals": [
+            "C",
+            "Z",
+            "RUN",
+            "PC_EN"
+          ],
+          "count": 4,
+          "color": "緑",
+          "driver": "LEDFLG",
+          "note": "C・Z・実行中（RUN）・停止（HLT。PC_EN が L のとき点灯）"
+        }
+      ]
+    },
+    {
+      "id": "pc",
+      "title": "プログラムカウンタ",
+      "board": "main",
+      "layer": "core",
+      "leds": [],
+      "note": "PC の値は、実行中は pmem カードの番地 LED に出る"
+    },
+    {
+      "id": "clk",
+      "title": "クロックと位相",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "PH_R_n / PH_G_n / PH_B_n"
+          ],
+          "count": 1,
+          "color": "フルカラー",
+          "driver": "PHDEC",
+          "note": "T0 消灯・T1 赤・T2 緑・T3 青（D29）"
+        }
+      ]
+    },
+    {
+      "id": "pmem",
+      "title": "プログラムメモリ",
+      "board": "main",
+      "layer": "core",
+      "leds": [
+        {
+          "signals": [
+            "PA0..7"
+          ],
+          "count": 8,
+          "color": "黄",
+          "driver": "LEDPA"
+        },
+        {
+          "signals": [
+            "IR0..7",
+            "IR8..11",
+            "IR12..15"
+          ],
+          "count": 16,
+          "color": "黄",
+          "driver": "LEDIR",
+          "note": "実行中は実行中の命令語、停止中は WRITE モードで入力レジスタ、READ モードでメモリの内容"
+        }
+      ]
+    },
+    {
+      "id": "loader",
+      "title": "ローダ",
+      "board": "loader",
+      "layer": "panel",
+      "leds": [
+        {
+          "signals": [
+            "LD0..15"
+          ],
+          "count": 16,
+          "color": "黄",
+          "driver": "LDATA",
+          "note": "入力レジスタ専用。どのモードでも入力中の値が見える"
+        }
+      ]
+    },
+    {
+      "id": "io",
+      "title": "入出力",
+      "board": "io",
+      "layer": "peripheral",
+      "leds": [
+        {
+          "signals": [
+            "OUT0..7"
+          ],
+          "count": 8,
+          "color": "黄",
+          "driver": "OUTPORT"
+        }
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "id": "data",
+      "title": "データの流れ",
+      "note": "太線は 2 本以上のバス。"
+    },
+    {
+      "id": "ctrl",
+      "title": "制御の流れ",
+      "note": "IR8..11 と IR12..15 は命令語の FN と OP。ストローブの位相は docs/design/SYSTEM.md の 5 章。"
+    },
+    {
+      "id": "clock",
+      "title": "クロック・位相・停止",
+      "note": "clk カード。RUN はローダ基板の RUN/STOP スイッチから来る。"
+    },
+    {
+      "id": "loader",
+      "title": "ローダ基板",
+      "note": "キーの行列走査、入力レジスタ、番地カウンタ、書き込みの許可。"
+    },
+    {
+      "id": "io",
+      "title": "io 基板",
+      "note": "拡張ポートの先。出力ポート 0 と入力ポート 0。"
+    }
+  ],
+  "fig_extra": {
+    "loader": {
+      "PD0..15": [
+        "PMM"
+      ]
+    },
+    "io": {
+      "A0..7": [
+        "OUTPORT"
+      ],
+      "R0..7": [
+        "ACC"
+      ],
+      "IR8..11": [
+        "PSEL"
+      ],
+      "INRD_n": [
+        "PSEL"
+      ],
+      "OSTB_n": [
+        "PSEL"
+      ]
+    }
+  },
+  "blocks": [
+    {
+      "id": "ALU",
+      "refs": "ALU-L / ALU-H",
+      "part": "74x181",
+      "count": 2,
+      "slot": "ALU",
+      "role": "8bit ALU の下位・上位スライス",
+      "card": "alu8",
+      "lacks": "すべての演算とロード"
+    },
+    {
+      "id": "CLA",
+      "refs": "CLA",
+      "part": "74x182",
+      "count": 1,
+      "slot": "CLA",
+      "role": "下位スライスの P・G から上位スライスへの桁上げを作る",
+      "card": "alu8",
+      "lacks": "8bit の加減算",
+      "node": "ALU"
+    },
+    {
+      "id": "MULH",
+      "refs": "MUL-H",
+      "part": "74x284",
+      "count": 1,
+      "slot": "MUL",
+      "role": "積の上位 4bit",
+      "card": "mul",
+      "lacks": "MUL 命令",
+      "node": "MUL"
+    },
+    {
+      "id": "MULL",
+      "refs": "MUL-L",
+      "part": "74x285",
+      "count": 1,
+      "slot": "MUL",
+      "role": "積の下位 4bit",
+      "card": "mul",
+      "lacks": "MUL 命令",
+      "node": "MUL"
+    },
+    {
+      "id": "RAM",
+      "refs": "RAM-L / RAM-H",
+      "part": "74x89",
+      "count": 2,
+      "slot": "RAM",
+      "role": "データ RAM 16 語 × 8bit",
+      "card": "ram",
+      "lacks": "変数の保持"
+    },
+    {
+      "id": "RAMB",
+      "refs": "RAM-B",
+      "part": "74x240",
+      "count": 1,
+      "role": "RAM の反転出力を正論理に戻し、DO バスを駆動する（D33）",
+      "card": "ram",
+      "lacks": "RAM の読み出し"
+    },
+    {
+      "id": "ACC",
+      "refs": "ACC",
+      "part": "74x374",
+      "count": 1,
+      "slot": "ACC",
+      "role": "A レジスタ。A バスを駆動する（D30）",
+      "card": "acc",
+      "lacks": "演算の左辺と結果の保持"
+    },
+    {
+      "id": "BSEL",
+      "refs": "BSEL-L / BSEL-H",
+      "part": "74x157",
+      "count": 2,
+      "role": "B 入力を即値（IR0..7）と RAM（DO）から選ぶ",
+      "card": "bsel",
+      "lacks": "即値とメモリの使い分け"
+    },
+    {
+      "id": "RSEL",
+      "refs": "RSEL-L / RSEL-H",
+      "part": "74x257",
+      "count": 2,
+      "role": "結果を ALU（F）と乗算器（P）から選んで R バスへ出す。IN のときは出力を切る（D31）",
+      "card": "rsel",
+      "lacks": "MUL の結果、IN"
+    },
+    {
+      "id": "ZDET",
+      "refs": "ZDET",
+      "part": "74x521",
+      "count": 1,
+      "device": "SN74ALS521",
+      "role": "R バスが 0 かを検出する",
+      "card": "rsel",
+      "lacks": "Z フラグ、JZ / JNZ"
+    },
+    {
+      "id": "IDEC",
+      "refs": "IDEC",
+      "part": "74x154",
+      "count": 1,
+      "device": "CD74HC154",
+      "role": "OP を 16 本の L アクティブ信号に展開する",
+      "card": "ctrl",
+      "lacks": "全命令の制御"
+    },
+    {
+      "id": "CSEL",
+      "refs": "CSEL",
+      "part": "74x151",
+      "count": 1,
+      "role": "命令群ごとに ALU の桁上げ入力（なし／あり／C フラグ）を選ぶ",
+      "card": "ctrl",
+      "lacks": "SUB・INC・ADC・SBC・CMP"
+    },
+    {
+      "id": "FLAGS",
+      "refs": "FLAGS",
+      "part": "74x74",
+      "count": 1,
+      "role": "C フラグと Z フラグ",
+      "card": "ctrl",
+      "lacks": "条件分岐、多倍長演算"
+    },
+    {
+      "id": "COND",
+      "refs": "COND",
+      "part": "74x151",
+      "count": 1,
+      "role": "FN で指定した分岐条件を選び、PC のロードを決める（D32）",
+      "card": "ctrl",
+      "lacks": "JMP と条件分岐"
+    },
+    {
+      "id": "GLUE",
+      "refs": "GLUE",
+      "part": "74x00",
+      "count": 5,
+      "parts": [
+        "74x00",
+        "74x10",
+        "74x11",
+        "74x30",
+        "74x32"
+      ],
+      "count_approx": true,
+      "role": "制御信号の合成と、書き込み・更新ストローブ",
+      "card": "ctrl",
+      "lacks": "各制御信号",
+      "note": "ゲートの割り付けと個数はカード設計で確定する"
+    },
+    {
+      "id": "PC",
+      "refs": "PC-L / PC-H",
+      "part": "74x161",
+      "count": 2,
+      "role": "プログラムカウンタ 8bit（計数・ロード・クリア）",
+      "card": "pc",
+      "lacks": "命令の順次実行と分岐"
+    },
+    {
+      "id": "OSC",
+      "refs": "OSC",
+      "part": "74x124",
+      "count": 1,
+      "device": "SN74S124",
+      "role": "原発振。制御電圧で周波数を変えられる（D42。仕様は照合待ち）",
+      "card": "clk",
+      "lacks": "自動実行"
+    },
+    {
+      "id": "DIV",
+      "refs": "DIV",
+      "part": "74x393",
+      "count": 1,
+      "role": "分周。タップをジャンパで選ぶ（D42）",
+      "card": "clk",
+      "lacks": "速度の選択"
+    },
+    {
+      "id": "DEB",
+      "refs": "DEB",
+      "part": "74x132",
+      "count": 1,
+      "role": "STEP・RESET のチャタリング除去（RC + シュミット入力）と、AUTO / MANUAL のクロック切り替え",
+      "card": "clk",
+      "lacks": "手動ステップ、リセット",
+      "note": "ゲートの割り付けはカード設計で確定する"
+    },
+    {
+      "id": "RUNSYNC",
+      "refs": "RUNSYNC",
+      "part": "74x109",
+      "count": 1,
+      "role": "RUN / STOP を命令の切れ目（T3 の終わり）でだけ切り替える（D40）",
+      "card": "clk",
+      "lacks": "命令の途中で止めない停止"
+    },
+    {
+      "id": "PHASE",
+      "refs": "PHASE",
+      "part": "74x74",
+      "count": 1,
+      "role": "2bit ジョンソンカウンタで 1 命令を 4 位相に分ける（D30）",
+      "card": "clk",
+      "lacks": "書き込みと更新のタイミング"
+    },
+    {
+      "id": "PHDEC",
+      "refs": "PHDEC",
+      "part": "74x139",
+      "count": 1,
+      "role": "位相 Q1・Q2 を T0〜T3 に展開する。片側は制御用、片側は位相 LED の駆動用（D29）",
+      "card": "clk",
+      "lacks": "書き込み・更新ストローブ、位相表示"
+    },
+    {
+      "id": "PMA",
+      "refs": "PM-A",
+      "part": "74x157",
+      "count": 2,
+      "role": "プログラムメモリの番地を PC（実行中）とローダ（停止中）で切り替える",
+      "card": "pmem",
+      "lacks": "プログラムの書き込み"
+    },
+    {
+      "id": "PMM",
+      "refs": "PM-M",
+      "part": "SRAM",
+      "count": 2,
+      "role": "16bit × 256 語のプログラム記憶。電池バックアップ（D24・D37）",
+      "card": "pmem",
+      "lacks": "プログラムの保持",
+      "note": "74 以外（D8）。候補は hw/parts_non74.json"
+    },
+    {
+      "id": "PMB",
+      "refs": "PM-B",
+      "part": "74x244",
+      "count": 2,
+      "role": "命令語を IR バスへ駆動する（FN 線は 74S181 2 個分の負荷）",
+      "card": "pmem",
+      "lacks": "命令の供給"
+    },
+    {
+      "id": "LEDPA",
+      "refs": "LED-PA",
+      "part": "74x541",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "pmem",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDIR",
+      "refs": "LED-IR",
+      "part": "74x240",
+      "count": 2,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "pmem",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDA",
+      "refs": "LED-A",
+      "part": "74x540",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "acc",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDB",
+      "refs": "LED-B",
+      "part": "74x244",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "bsel",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDR",
+      "refs": "LED-R",
+      "part": "74x760",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "rsel",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDCTL",
+      "refs": "LED-CTL",
+      "part": "74x241",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "ctrl",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "LEDFLG",
+      "refs": "LED-FLG",
+      "part": "74x05",
+      "count": 1,
+      "role": "LED の駆動。信号の負荷を増やさないよう、LED はバッファを介して点ける",
+      "card": "ctrl",
+      "lacks": "そのカードの LED 表示",
+      "kind": "led_driver",
+      "note": "型番の振り分けはカード設計で決める（D36）"
+    },
+    {
+      "id": "KSOSC",
+      "refs": "KS-OSC",
+      "part": "74x14",
+      "count": 1,
+      "role": "キー走査の発振と、機能キー 4 個のチャタリング除去（RC + シュミット入力）",
+      "card": "loader",
+      "lacks": "キー入力"
+    },
+    {
+      "id": "KSCNT",
+      "refs": "KS-CNT",
+      "part": "74x93",
+      "count": 1,
+      "role": "キー走査の計数器。キーが見つかると止まり、値がキーの番号になる",
+      "card": "loader",
+      "lacks": "キー入力"
+    },
+    {
+      "id": "KSROW",
+      "refs": "KS-ROW",
+      "part": "74x156",
+      "count": 1,
+      "role": "走査する行を選ぶ（オープンコレクタ出力なので、2 つ同時に押しても出力どうしがぶつからない）",
+      "card": "loader",
+      "lacks": "キー入力"
+    },
+    {
+      "id": "KSCOL",
+      "refs": "KS-COL",
+      "part": "74x153",
+      "count": 1,
+      "role": "走査中の列を読み、押されているかを返す",
+      "card": "loader",
+      "lacks": "キー入力"
+    },
+    {
+      "id": "KSDEB",
+      "refs": "KS-DEB",
+      "part": "74x221",
+      "count": 1,
+      "role": "キーが押され続けたことを確かめてから 1 回だけ取り込みパルスを出す",
+      "card": "loader",
+      "lacks": "キーの確実な 1 回入力"
+    },
+    {
+      "id": "LDATA",
+      "refs": "LDATA-L / LDATA-H",
+      "part": "74x273",
+      "count": 2,
+      "role": "キーを押すたびに 4bit ずつ桁送りする 16bit の入力レジスタ。LED も直接点ける",
+      "card": "loader",
+      "lacks": "書き込むデータと番地の入力"
+    },
+    {
+      "id": "LBUF",
+      "refs": "LBUF-L / LBUF-H",
+      "part": "74x245",
+      "count": 2,
+      "role": "書き込みのときだけ入力レジスタをプログラムメモリのデータ線へつなぐ",
+      "card": "loader",
+      "lacks": "プログラムの書き込み"
+    },
+    {
+      "id": "LADDR",
+      "refs": "LADDR-L / LADDR-H",
+      "part": "74x193",
+      "count": 2,
+      "role": "ローダの番地カウンタ（設定・加算・減算）",
+      "card": "loader",
+      "lacks": "書き込み・読み出し番地の指定"
+    },
+    {
+      "id": "LGLUE",
+      "refs": "LGLUE",
+      "part": "74x00",
+      "count": 1,
+      "count_approx": true,
+      "role": "ローダの許可条件（停止中かつ書き込みモード）の合成",
+      "card": "loader",
+      "lacks": "実行中の誤書き込み防止"
+    },
+    {
+      "id": "PSEL",
+      "refs": "PSEL-O / PSEL-I",
+      "part": "74x138",
+      "count": 2,
+      "role": "ポート番号（IR8..11）とストローブから、ポート 0 の書き込み・読み出し信号を作る",
+      "card": "io",
+      "lacks": "ポートの選択",
+      "note": "2 個目はファミリ違いにする（D36）"
+    },
+    {
+      "id": "OUTPORT",
+      "refs": "OUTPORT",
+      "part": "74x574",
+      "count": 1,
+      "slot": "OUTPORT",
+      "role": "出力ポート 0。OUT 命令の A を保持し、LED を直接点ける",
+      "card": "io",
+      "lacks": "OUT 命令",
+      "note": "io 基板の出力ポートの位置。実装は hw/cards/reg8_574（D30）"
+    },
+    {
+      "id": "INPORT",
+      "refs": "INPORT",
+      "part": "74x244",
+      "count": 1,
+      "role": "入力ポート 0。スイッチ 8 個の状態を IN 命令のとき R バスへ出す（D31）",
+      "card": "io",
+      "lacks": "IN 命令"
+    },
+    {
+      "id": "KEYPAD",
+      "external": true,
+      "label": "16 進キー（4 × 4 行列）",
+      "board": "loader"
+    },
+    {
+      "id": "FKEYS",
+      "external": true,
+      "label": "機能キー（AS・WI・RI・RD）",
+      "board": "loader"
+    },
+    {
+      "id": "LSW",
+      "external": true,
+      "label": "スイッチ（RUN/STOP・WRITE/READ）",
+      "board": "loader"
+    },
+    {
+      "id": "CSW",
+      "external": true,
+      "label": "スイッチ（AUTO/MANUAL・STEP・RESET）と速度のボリューム・ジャンパ",
+      "board": "main"
+    },
+    {
+      "id": "PHLED",
+      "external": true,
+      "label": "位相表示 LED（フルカラー）",
+      "board": "main"
+    },
+    {
+      "id": "INSW",
+      "external": true,
+      "label": "入力スイッチ 8 個",
+      "board": "io"
+    },
+    {
+      "id": "OUTDEV",
+      "external": true,
+      "label": "出力ポートの LED と端子",
+      "board": "io"
+    },
+    {
+      "id": "EXTC",
+      "external": true,
+      "label": "外部条件（予約。未接続時は偽）",
+      "board": "io"
+    }
+  ],
+  "signals": [
+    {
+      "name": "PC0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "PC"
+      ],
+      "to": [
+        "PMA"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "実行中の番地"
+    },
+    {
+      "name": "PA0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "PMA"
+      ],
+      "to": [
+        "PMM"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T2 の初め",
+      "desc": "プログラムメモリの番地（実行中は PC、停止中はローダの番地）"
+    },
+    {
+      "name": "PD0..15",
+      "width": 16,
+      "polarity": "正・3 ステート",
+      "from": [
+        "PMM",
+        "LBUF"
+      ],
+      "to": [
+        "PMB",
+        "PMM"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T2 の初め",
+      "desc": "プログラムメモリのデータ線。読み出しは PM-M、書き込みは LBUF が駆動",
+      "shared": "3state"
+    },
+    {
+      "name": "IR0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "PMB"
+      ],
+      "to": [
+        "BSEL",
+        {
+          "block": "RAM",
+          "label": "IR0..3 番地"
+        },
+        {
+          "block": "PC",
+          "label": "IR0..7 飛び先"
+        }
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T2 の初め",
+      "desc": "命令語の OPERAND"
+    },
+    {
+      "name": "IR8..11",
+      "width": 4,
+      "polarity": "正",
+      "from": [
+        "PMB"
+      ],
+      "to": [
+        {
+          "block": "ALU",
+          "label": "IR8..11 = S0..S3"
+        },
+        "COND",
+        "PSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T2 の初め",
+      "desc": "命令語の FN。ALU の機能選択、分岐条件、ポート番号"
+    },
+    {
+      "name": "IR12..15",
+      "width": 4,
+      "polarity": "正",
+      "from": [
+        "PMB"
+      ],
+      "to": [
+        "IDEC",
+        {
+          "block": "CSEL",
+          "label": "IR13..15"
+        },
+        {
+          "block": "BSEL",
+          "label": "IR12"
+        }
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T2 の初め",
+      "desc": "命令語の OP"
+    },
+    {
+      "name": "A0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "ACC"
+      ],
+      "to": [
+        "ALU",
+        {
+          "block": "MULH",
+          "label": "A0..3"
+        },
+        {
+          "block": "MULL",
+          "label": "A0..3"
+        },
+        {
+          "block": "RAM",
+          "label": "A0..7 書き込みデータ"
+        },
+        "OUTPORT"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "A レジスタ"
+    },
+    {
+      "name": "RQ0..7_n",
+      "width": 8,
+      "polarity": "負・オープンコレクタ",
+      "from": [
+        "RAM"
+      ],
+      "to": [
+        "RAMB"
+      ],
+      "fig": "data",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "RAM の出力（記憶内容の反転）。プルアップつき"
+    },
+    {
+      "name": "DO0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "RAMB"
+      ],
+      "to": [
+        "BSEL"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "RAM[IR0..3] の内容"
+    },
+    {
+      "name": "B0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "BSEL"
+      ],
+      "to": [
+        "ALU",
+        {
+          "block": "MULH",
+          "label": "B0..3"
+        },
+        {
+          "block": "MULL",
+          "label": "B0..3"
+        }
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "演算の右辺"
+    },
+    {
+      "name": "F0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "ALU"
+      ],
+      "to": [
+        "RSEL"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "ALU の結果"
+    },
+    {
+      "name": "P0..7",
+      "width": 8,
+      "polarity": "正・プルアップつき",
+      "from": [
+        "MULH",
+        "MULL"
+      ],
+      "to": [
+        "RSEL"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "A0..3 × B0..3（上位 4bit は MUL-H、下位 4bit は MUL-L）",
+      "shared": "split"
+    },
+    {
+      "name": "R0..7",
+      "width": 8,
+      "polarity": "正・3 ステート",
+      "from": [
+        "RSEL",
+        "INPORT"
+      ],
+      "to": [
+        "ACC",
+        "ZDET"
+      ],
+      "fig": "data",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "A へ書き戻す値。IN のときは入力ポートが駆動。どこも駆動しないときはプルアップで FF",
+      "shared": "3state"
+    },
+    {
+      "name": "P_n / G_n",
+      "width": 2,
+      "polarity": "負",
+      "from": [
+        "ALU"
+      ],
+      "to": [
+        "CLA"
+      ],
+      "fig": "none",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "下位スライスの桁上げ伝搬・生成"
+    },
+    {
+      "name": "CNH_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "CLA"
+      ],
+      "to": [
+        "ALU"
+      ],
+      "fig": "none",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "上位スライスへの桁上げ（CLA の Cn+x）"
+    },
+    {
+      "name": "Y0_n..Y15_n",
+      "width": 16,
+      "polarity": "負",
+      "from": [
+        "IDEC"
+      ],
+      "to": [
+        "GLUE"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T2 の初め",
+      "desc": "OP = k のとき Yk_n だけ L"
+    },
+    {
+      "name": "Q1 / Q2",
+      "width": 2,
+      "polarity": "正",
+      "from": [
+        "PHASE"
+      ],
+      "to": [
+        "PHDEC",
+        "RUNSYNC"
+      ],
+      "fig": "clock",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "位相カウンタ。T0 = 00、T1 = 10、T2 = 11、T3 = 01。RUNSYNC は T3 の終わりを知るのに使う"
+    },
+    {
+      "name": "T0_n / T2_n / T3_n",
+      "width": 3,
+      "polarity": "負",
+      "from": [
+        "PHDEC"
+      ],
+      "to": [
+        "GLUE"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "位相の展開（PHDEC の制御用の片側）。T0_n は入力ポートの読み出し許可、T2_n は書き込み、T3_n は更新に使う"
+    },
+    {
+      "name": "M",
+      "width": 1,
+      "polarity": "正（H で論理演算）",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "ALU"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "74x181 のモード"
+    },
+    {
+      "name": "CN_n",
+      "width": 1,
+      "polarity": "負（L で桁上げあり）",
+      "from": [
+        "CSEL"
+      ],
+      "to": [
+        "ALU",
+        "CLA"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "ALU の桁上げ入力"
+    },
+    {
+      "name": "COUT_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "ALU"
+      ],
+      "to": [
+        "FLAGS"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "桁上げ出力（上位スライスの Cn+4）"
+    },
+    {
+      "name": "ZERO_n",
+      "width": 1,
+      "polarity": "負（L で R = 0）",
+      "from": [
+        "ZDET"
+      ],
+      "to": [
+        "FLAGS"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "結果が 0"
+    },
+    {
+      "name": "C",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "FLAGS"
+      ],
+      "to": [
+        "COND"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "C フラグ"
+    },
+    {
+      "name": "C_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "FLAGS"
+      ],
+      "to": [
+        "COND",
+        "CSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "C フラグの反転（フリップフロップの Q）"
+    },
+    {
+      "name": "Z",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "FLAGS"
+      ],
+      "to": [
+        "COND"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "Z フラグ"
+    },
+    {
+      "name": "Z_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "FLAGS"
+      ],
+      "to": [
+        "COND"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T3 の終わりに変わる",
+      "desc": "Z フラグの反転（フリップフロップの Q）"
+    },
+    {
+      "name": "A_LD / C_LD / Z_LD",
+      "width": 3,
+      "polarity": "正",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "GLUE"
+      ],
+      "fig": "none",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "A・C・Z を更新する命令か（4 章の論理式）。LED にも出す"
+    },
+    {
+      "name": "SEL_MUL",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "RSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "H で P、L で F を選ぶ"
+    },
+    {
+      "name": "IN",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "RSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "IN 命令。RSEL の出力を切る（組み合わせ回路で、命令が変わるとすぐ追従する）"
+    },
+    {
+      "name": "INRD_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "PSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "IN 命令の T1〜T3 だけ L（NAND(IN, NOT T0_n)）。入力ポートはこの間だけ R バスを駆動する。命令の切り替わり（T0）で RSEL と入力ポートが同時に R バスを駆動しないようにする"
+    },
+    {
+      "name": "WR_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "RAM"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T2 だけ L",
+      "desc": "RAM 書き込みストローブ"
+    },
+    {
+      "name": "OSTB_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "PSEL"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T2 だけ L",
+      "desc": "出力ストローブ"
+    },
+    {
+      "name": "ACK",
+      "width": 1,
+      "polarity": "立ち上がりで取り込み",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "ACC"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "A の更新ストローブ"
+    },
+    {
+      "name": "CCK / ZCK",
+      "width": 2,
+      "polarity": "立ち上がりで取り込み",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "FLAGS"
+      ],
+      "fig": "ctrl",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "C・Z の更新ストローブ"
+    },
+    {
+      "name": "PCK",
+      "width": 1,
+      "polarity": "立ち上がりで取り込み",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "PC"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "PC の更新ストローブ"
+    },
+    {
+      "name": "PC_EN",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "GLUE"
+      ],
+      "to": [
+        "PC"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "L で計数を止める（HLT）。LED は L で点灯"
+    },
+    {
+      "name": "PC_LD_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "COND"
+      ],
+      "to": [
+        "PC"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "L で飛び先をロード"
+    },
+    {
+      "name": "EXTC5..7",
+      "width": 3,
+      "polarity": "正",
+      "from": [
+        "EXTC"
+      ],
+      "to": [
+        "COND"
+      ],
+      "fig": "ctrl",
+      "scope": "カード間",
+      "deadline": "T3 の終わり",
+      "desc": "JP の FN = 5〜7 用の外部条件（予約。D32）。プルダウンは本体（ctrl カードの COND の入力）に置き、io 基板が無いときも L で分岐しない"
+    },
+    {
+      "name": "CSWIN",
+      "width": 4,
+      "polarity": "—",
+      "from": [
+        "CSW"
+      ],
+      "to": [
+        "DEB"
+      ],
+      "fig": "clock",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "AUTO/MANUAL・STEP・RESET の接点と速度のボリューム"
+    },
+    {
+      "name": "OSC_OUT",
+      "width": 1,
+      "polarity": "—",
+      "from": [
+        "OSC"
+      ],
+      "to": [
+        "DIV"
+      ],
+      "fig": "clock",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "原発振"
+    },
+    {
+      "name": "DIV_OUT",
+      "width": 1,
+      "polarity": "—",
+      "from": [
+        "DIV"
+      ],
+      "to": [
+        "DEB"
+      ],
+      "fig": "clock",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "ジャンパで選んだ分周出力"
+    },
+    {
+      "name": "CK4",
+      "width": 1,
+      "polarity": "立ち上がりで位相が進む",
+      "from": [
+        "DEB"
+      ],
+      "to": [
+        "PHASE",
+        "RUNSYNC"
+      ],
+      "fig": "clock",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "位相カウンタのクロック。AUTO は分周出力、MANUAL は STEP の 1 押しで 1 位相（D29）"
+    },
+    {
+      "name": "RUN_SW",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "LSW"
+      ],
+      "to": [
+        "RUNSYNC"
+      ],
+      "fig": "clock",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "RUN/STOP スイッチの状態"
+    },
+    {
+      "name": "RUN",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "RUNSYNC"
+      ],
+      "to": [
+        "PHASE",
+        "PMA",
+        "LGLUE",
+        "KSOSC",
+        "KSDEB"
+      ],
+      "fig": "clock",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "H で実行。命令の切れ目でだけ変わる。L の間は位相が T0 に留まり、番地はローダ側になり、ローダの操作（キーの取り込み・番地の操作・書き込み）を受け付ける"
+    },
+    {
+      "name": "RST_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "DEB"
+      ],
+      "to": [
+        "PC",
+        "FLAGS",
+        "PHASE",
+        "RUNSYNC"
+      ],
+      "fig": "clock",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "リセット。PC = 0、C = 0、Z = 0、位相 = T0、RUN = 停止（D34）。解除後の最初の CK4 で RUN/STOP スイッチの状態を取り込む"
+    },
+    {
+      "name": "PH_R_n / PH_G_n / PH_B_n",
+      "width": 3,
+      "polarity": "負",
+      "from": [
+        "PHDEC"
+      ],
+      "to": [
+        "PHLED"
+      ],
+      "fig": "clock",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "位相表示。T0 消灯、T1 赤、T2 緑、T3 青"
+    },
+    {
+      "name": "KROW0..3_n",
+      "width": 4,
+      "polarity": "負・オープンコレクタ",
+      "from": [
+        "KSROW"
+      ],
+      "to": [
+        "KEYPAD"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "走査中の行だけ L"
+    },
+    {
+      "name": "KCOL0..3_n",
+      "width": 4,
+      "polarity": "負・プルアップつき",
+      "from": [
+        "KEYPAD"
+      ],
+      "to": [
+        "KSCOL"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "押されたキーの列が L"
+    },
+    {
+      "name": "KSCLK",
+      "width": 1,
+      "polarity": "—",
+      "from": [
+        "KSOSC"
+      ],
+      "to": [
+        "KSCNT",
+        "KSDEB"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "走査のクロック"
+    },
+    {
+      "name": "KD0..3",
+      "width": 4,
+      "polarity": "正",
+      "from": [
+        "KSCNT"
+      ],
+      "to": [
+        {
+          "block": "KSROW",
+          "label": "KD2..3 行"
+        },
+        {
+          "block": "KSCOL",
+          "label": "KD0..1 列"
+        },
+        "LDATA"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "走査位置。キーが見つかって止まるとキーの値になる"
+    },
+    {
+      "name": "KHIT_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "KSCOL"
+      ],
+      "to": [
+        "KSCNT",
+        "KSDEB"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "走査中のキーが押されている"
+    },
+    {
+      "name": "KSTB",
+      "width": 1,
+      "polarity": "立ち上がりで取り込み",
+      "from": [
+        "KSDEB"
+      ],
+      "to": [
+        "LDATA"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "キー 1 回につき 1 パルス。入力レジスタを 4bit 桁送りする"
+    },
+    {
+      "name": "FKEY",
+      "width": 4,
+      "polarity": "負",
+      "from": [
+        "FKEYS"
+      ],
+      "to": [
+        "KSOSC"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "機能キーの接点（AS・WI・RI・RD）"
+    },
+    {
+      "name": "AS_n / UP / DN",
+      "width": 3,
+      "polarity": "—",
+      "from": [
+        "KSOSC"
+      ],
+      "to": [
+        "LADDR"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "番地設定（入力レジスタの下位 8bit をロード）、送り、戻し"
+    },
+    {
+      "name": "WI_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "KSOSC"
+      ],
+      "to": [
+        "LGLUE"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "書き込みキーを押している間 L"
+    },
+    {
+      "name": "LD0..15",
+      "width": 16,
+      "polarity": "正",
+      "from": [
+        "LDATA"
+      ],
+      "to": [
+        "LBUF",
+        {
+          "block": "LADDR",
+          "label": "LD0..7 番地設定の値"
+        }
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "入力レジスタの内容"
+    },
+    {
+      "name": "LA0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "LADDR"
+      ],
+      "to": [
+        "PMA"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "ローダの番地"
+    },
+    {
+      "name": "WRITE",
+      "width": 1,
+      "polarity": "正",
+      "from": [
+        "LSW"
+      ],
+      "to": [
+        "LGLUE"
+      ],
+      "fig": "loader",
+      "scope": "カード内",
+      "deadline": "—",
+      "desc": "H で書き込みモード"
+    },
+    {
+      "name": "PWE_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "LGLUE"
+      ],
+      "to": [
+        "PMM"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "プログラムメモリの書き込みパルス（停止中・書き込みモード・WI 押下中だけ L）"
+    },
+    {
+      "name": "LOE_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "LGLUE"
+      ],
+      "to": [
+        "LBUF",
+        "PMM"
+      ],
+      "fig": "loader",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "L で LBUF がデータ線を駆動し、PM-M の出力を切る（停止中・書き込みモード）"
+    },
+    {
+      "name": "OSTB0_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "PSEL"
+      ],
+      "to": [
+        "OUTPORT"
+      ],
+      "fig": "io",
+      "scope": "カード内",
+      "deadline": "T2 だけ L",
+      "desc": "ポート 0 の書き込み。H に戻る縁で A を取り込む"
+    },
+    {
+      "name": "IEN0_n",
+      "width": 1,
+      "polarity": "負",
+      "from": [
+        "PSEL"
+      ],
+      "to": [
+        "INPORT"
+      ],
+      "fig": "io",
+      "scope": "カード内",
+      "deadline": "T3 の終わり",
+      "desc": "ポート 0 の読み出し（INRD_n と IR8..11 = 0）。L の間 R バスを駆動する"
+    },
+    {
+      "name": "INSW0..7",
+      "width": 8,
+      "polarity": "正・プルアップつき",
+      "from": [
+        "INSW"
+      ],
+      "to": [
+        "INPORT"
+      ],
+      "fig": "io",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "入力スイッチ"
+    },
+    {
+      "name": "OUT0..7",
+      "width": 8,
+      "polarity": "正",
+      "from": [
+        "OUTPORT"
+      ],
+      "to": [
+        "OUTDEV"
+      ],
+      "fig": "io",
+      "scope": "カード間",
+      "deadline": "—",
+      "desc": "出力ポート 0 の値"
+    }
+  ]
+}

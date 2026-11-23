@@ -1,0 +1,20 @@
+flowchart LR
+  PMB["PM-B<br/>74x244 x2<br/>(pmem)"]
+  PSEL["PSEL-O / PSEL-I<br/>74x138 x2<br/>(io)"]
+  ACC["ACC<br/>74x374<br/>(acc)"]
+  OUTPORT["OUTPORT<br/>74x574<br/>(io)"]
+  RSEL["RSEL-L / RSEL-H<br/>74x257 x2<br/>(rsel)"]
+  INPORT["INPORT<br/>74x244<br/>(io)"]
+  GLUE["GLUE<br/>74x00/10/11/30/32 x5<br/>(ctrl)"]
+  INSW["入力スイッチ 8 個<br/>(io 基板)"]
+  OUTDEV["出力ポートの LED と端子<br/>(io 基板)"]
+
+  PMB == "IR8..11" ==> PSEL
+  ACC == "A0..7" ==> OUTPORT
+  RSEL == "R0..7" ==> ACC
+  INPORT == "R0..7" ==> ACC
+  GLUE -- "INRD_n / OSTB_n" --> PSEL
+  PSEL -- "OSTB0_n" --> OUTPORT
+  PSEL -- "IEN0_n" --> INPORT
+  INSW == "INSW0..7" ==> INPORT
+  OUTPORT == "OUT0..7" ==> OUTDEV

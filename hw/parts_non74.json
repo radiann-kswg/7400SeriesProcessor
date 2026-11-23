@@ -1,0 +1,40 @@
+{
+  "version": "0.1-draft",
+  "note": "74 シリーズ以外の部品の一覧（D8: プログラム記憶・発振子・電源・高圧に限る）。載せるのは設計上の要件と候補の実型番まで。購入先・価格・購入予定は載せない（AGENTS.md の公開範囲）。status は candidate（候補。一次資料は未照合）→ verified（データシート照合済み）→ adopted（採用）。 キーの書き方は Collection の台帳（PartNumber など）に合わせている。",
+  "parts": [
+    {
+      "PartNumber": "62256",
+      "Category": "program_memory",
+      "Block": "PM-M",
+      "Quantity": 2,
+      "Role": "プログラムメモリ。バイト幅の SRAM 2 個で 16bit 語 × 256 語（D24）。上位の番地入力は固定して使う",
+      "Requirements": [
+        "5 V 単電源で動作する",
+        "DIP（挿入部品）",
+        "バイト幅・256 語以上",
+        "データ保持電圧が電池バックアップ（D24）で保てる範囲にある",
+        "入力が TTL レベルの H を H と判定できる"
+      ],
+      "Candidates": [
+        "AS6C62256-55PCN"
+      ],
+      "Status": "candidate",
+      "Notes": "32K × 8。電源電圧・アクセス時間・データ保持電圧などはメーカーのデータシートで未照合（照合したら出典の DocID・頁を添えて status を verified にする）"
+    },
+    {
+      "PartNumber": "6264",
+      "Category": "program_memory",
+      "Block": "PM-M",
+      "Quantity": 2,
+      "Role": "プログラムメモリの別候補（62256 と同じ役割。どちらか一方を使う）",
+      "Requirements": [
+        "62256 の項と同じ"
+      ],
+      "Candidates": [
+        "AS6C6264-55PCN"
+      ],
+      "Status": "candidate",
+      "Notes": "8K × 8。62256 とのピン配置の違いを含め、メーカーのデータシートで未照合"
+    }
+  ]
+}
