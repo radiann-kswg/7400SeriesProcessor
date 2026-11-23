@@ -14,4 +14,4 @@
 | `arch_boards.png` | 基板の構成（本体・ローダ基板・io 基板と接続口） | `SYSTEM.md` 7.1 節 |
 | `arch_leds.png` | LED 表示の一覧 | `SYSTEM.md` 7.3 節、D39 |
 
-書き出し: 2026-11-23。`hw/system.json` v0.3（ブロック 52・信号 64・LED 85）に対応。
+書き出し: 2026-11-23。`hw/system.json` v0.3（ブロック 53・信号 64・LED 85）に対応。`arch_phase.png`・`arch_leds.png`・`arch_boards.png` は D29 の改訂（位相 LED を Q1 = 赤・Q2 = 緑で点け、T2 黄・T3 緑。駆動は LED-PH）に合わせて同日に書き出し直した。
