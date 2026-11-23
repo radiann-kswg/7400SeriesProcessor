@@ -15,7 +15,7 @@
 新しい型番が手に入ったときの流れ:
 
 1. `slots.json` の候補に無ければ、担える役割の `candidates` に追加する。
-2. データシートを収集して目視照合し、pinspec を作る（`collection/CLAUDE.md` の手順）。
+2. データシートを収集して目視照合し、pinspec を作る（`collection/AGENTS.md` の「対話型ファクトチェック手順」）。
 3. `cards/<新カード>/card.json` を書く。同じ役割の既存カードとコネクタ信号を揃える。
 4. `python scripts/gen_card.py <新カード> --svg --erc` で配線表と回路図を生成し、目視確認する。
 5. `sim/` にその IC の動作モデルを追加し、テストを通す。
