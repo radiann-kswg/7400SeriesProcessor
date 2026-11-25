@@ -22,7 +22,7 @@
     },
     {
       "slot": "MUL",
-      "card": null,
+      "card": "mul",
       "parts": [
         "74x284",
         "74x285"

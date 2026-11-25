@@ -11,7 +11,8 @@
 
 ピン情報は pinspec（一次資料を目視照合した JSON）からだけ取る。pinspec が無い型番を含む
 カードは生成しない。探す順は hw/pinspec/ → collection/pcb-demo/_carrier/pinspec/。
-受動部品（kind が R / C / CP）は 2 端子の部品として扱い、pinspec は要らない。
+受動部品（kind が R / C / CP）は 2 端子の部品として扱い、pinspec は要らない。集合抵抗（kind が RN）は
+共通端子型（1 番が共通端子、2 番以降が各素子）として扱い、ピン数は card.json の pins の数で決まる。
 Python 標準ライブラリのみで動く。
 """
 from __future__ import annotations
@@ -38,6 +39,7 @@ KICAD_PIN_TYPE = {
 }
 # 受動部品の種類 → (1 番の名前, 2 番の名前)。CP は有極性コンデンサで 1 番が +
 PASSIVES = {"R": ("1", "2"), "C": ("1", "2"), "CP": ("+", "-")}
+NETWORKS = {"RN"}  # 共通端子型の集合抵抗。1 番が共通端子
 DEFAULT_CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
 _NS = uuid.UUID("7400c0de-0000-4000-8000-000000000000")
 
@@ -68,11 +70,17 @@ def load_card(card: str) -> dict:
     return data
 
 
-def passive_spec(kind: str) -> dict:
-    if kind not in PASSIVES:
-        raise CardError(f"受動部品の種類 {kind} は未対応（{' / '.join(PASSIVES)}）")
-    return {"package_pins": 2, "pins": {str(i): {"name": n, "dir": "passive"}
-                                        for i, n in enumerate(PASSIVES[kind], 1)}}
+def passive_spec(kind: str, n_pins: int = 2) -> dict:
+    if kind in NETWORKS:
+        if n_pins < 3:
+            raise CardError("集合抵抗は 3 ピン以上（共通端子 + 素子 2 個以上）")
+        names = ["COM"] + [str(i) for i in range(2, n_pins + 1)]
+    elif kind in PASSIVES:
+        names = PASSIVES[kind]
+    else:
+        raise CardError(f"受動部品の種類 {kind} は未対応（{' / '.join([*PASSIVES, *NETWORKS])}）")
+    return {"package_pins": len(names), "pins": {str(i): {"name": n, "dir": "passive"}
+                                                 for i, n in enumerate(names, 1)}}
 
 
 def net_purposes(data: dict) -> dict[str, str]:
@@ -94,7 +102,8 @@ def check_card(data: dict) -> tuple[list[dict], dict[str, list[str]], list[str]]
     if dup:
         raise CardError(f"参照名が重複している: {dup}")
     for comp in data["components"]:
-        spec, spec_path = (passive_spec(comp["kind"]), None) if "kind" in comp else load_pinspec(comp["part"])
+        spec, spec_path = ((passive_spec(comp["kind"], len(comp["pins"])), None) if "kind" in comp
+                           else load_pinspec(comp["part"]))
         pins, why = spec["pins"], comp.get("nc", {})
         missing = sorted(set(pins) - set(comp["pins"]), key=int)
         extra = sorted(set(comp["pins"]) - set(pins), key=int)
@@ -124,12 +133,13 @@ def check_card(data: dict) -> tuple[list[dict], dict[str, list[str]], list[str]]
     resistor_paths = {}
     for c in comps:
         d = c["def"]
-        if d.get("kind") == "R":
-            a, b = d["pins"]["1"], d["pins"]["2"]
-            if NC in (a, b):
-                continue
-            resistor_paths.setdefault(a, set()).add(b)
-            resistor_paths.setdefault(b, set()).add(a)
+        if d.get("kind") in ("R", *NETWORKS):  # 抵抗は 1 番と、2 番以降のそれぞれの間をつなぐ
+            a = d["pins"]["1"]
+            for num, b in d["pins"].items():
+                if num == "1" or NC in (a, b):
+                    continue
+                resistor_paths.setdefault(a, set()).add(b)
+                resistor_paths.setdefault(b, set()).add(a)
     driven = set(POWER_NETS.values())
     driven.update(net for net, d in dirs.items() if any(x in ("output", "connector") for x in d))
     purpose = net_purposes(data)
@@ -176,7 +186,7 @@ def write_wiring(card: str, data: dict, comps, nets, warnings) -> Path:
         src = spec.get("source", {})
         out += ["", f"## {d['ref']} — {d['part']}（{d.get('device', '実型番未定')}）", "",
                 f"- 役割: {d.get('role', '')}",
-                f"- pinspec: `{rel(c['spec_path'])}`（{src.get('doc_id', '?')} / 照合日 {src.get('checked', '?')}"
+                f"- pinspec: `{rel(c['spec_path'])}`（{src.get('doc_id') or 'DocID の記載なし'} / 照合日 {src.get('checked', '?')}"
                 f" / 読み取り信頼度 {src.get('confidence', '?')}%）", "",
                 "| ピン | 名称 | 方向 | 接続ネット |", "|---:|---|---|---|"]
         for num in sorted(spec["pins"], key=int):
@@ -185,11 +195,18 @@ def write_wiring(card: str, data: dict, comps, nets, warnings) -> Path:
             net = d["pins"][num]
             shown = f"（未接続: {d.get('nc', {}).get(num, '理由なし')}）" if net == NC else f"`{net}`"
             out.append(f"| {num} | {name} | {pin['dir']} | {shown} |")
-    passives = [c["def"] for c in comps if "kind" in c["def"]]
+    passives = [c["def"] for c in comps if c["def"].get("kind") in PASSIVES]
     if passives:
         out += ["", "## 受動部品", "", "| 参照名 | 種類 | 値 | 1 番 | 2 番 | 役割 |", "|---|---|---|---|---|---|"]
         out += [f"| {p['ref']} | {p['kind']} | {p.get('value', '')} | `{p['pins']['1']}` | `{p['pins']['2']}` | "
                 f"{p.get('role', '')} |" for p in passives]
+    networks = [c["def"] for c in comps if c["def"].get("kind") in NETWORKS]
+    if networks:
+        out += ["", "## 集合抵抗（共通端子型）", "", "| 参照名 | 値 | 1 番（共通） | 2 番〜（素子） | 役割 |",
+                "|---|---|---|---|---|"]
+        out += [f"| {p['ref']} | {p.get('value', '')} | `{p['pins']['1']}` | "
+                f"{'、'.join(f'{k}: `{v}`' for k, v in sorted(p['pins'].items(), key=lambda kv: int(kv[0])) if k != '1')} | "
+                f"{p.get('role', '')} |" for p in networks]
     conn = data.get("connector")
     if conn:
         out += ["", f"## {conn['ref']} — カードコネクタ（{conn.get('note', '')}）", "",
@@ -315,16 +332,19 @@ def write_schematic(card: str, data: dict, comps) -> Path:
         place(d["part"], d["ref"], d.get("device", d["part"]), pos, half_h, cx, cy, d["pins"],
               d.get("datasheet") or c["spec"].get("source", {}).get("doc_id", ""), d.get("device", ""))
 
-    # 受動部品は IC の下に 1 列に並べる（2 端子の小さな箱。左が 1 番）
+    # 受動部品は IC の下に 1 列に並べる（小さな箱。左が 1 番。集合抵抗は左が共通端子、右が 2 番から下へ）
     y = 101.6 + ((len(ics) - 1) // per_row) * row_h + 50.8
     for i, c in enumerate(c for c in comps if "kind" in c["def"]):
-        d = c["def"]
-        n1, n2 = PASSIVES[d["kind"]]
-        sym, pos, half_h = _lib_symbol(d["kind"], d["kind"][0], [("1", n1, "passive")], [("2", n2, "passive")], 2.54)
-        if d["kind"] not in done:
+        d, pins = c["def"], c["spec"]["pins"]
+        name = d["kind"] if d["kind"] in PASSIVES else f"{d['kind']}{len(pins)}"
+        prefix = d["kind"] if d["kind"] in NETWORKS else d["kind"][0]
+        right = [(k, pins[k]["name"], "passive") for k in sorted(pins, key=int) if k != "1"]
+        half_w = 5.08 if d["kind"] in NETWORKS else 2.54  # 集合抵抗は COM と素子の番号が並ぶので幅を取る
+        sym, pos, half_h = _lib_symbol(name, prefix, [("1", pins["1"]["name"], "passive")], right, half_w)
+        if name not in done:
             libs.append(sym)
-            done.add(d["kind"])
-        place(d["kind"], d["ref"], d.get("value", ""), pos, half_h, x0 + i * 38.1, y, d["pins"])
+            done.add(name)
+        place(name, d["ref"], d.get("value", ""), pos, half_h, x0 + i * 38.1, y, d["pins"])
 
     purpose = data.get("nets", {})
     if purpose:  # ネットの用途を回路図の左下に書く

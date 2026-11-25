@@ -11,7 +11,7 @@
 | `cards/<card>/DESIGN.md` | カードの解説（なぜそうつなぐか、電気計算、検証、目視チェックリスト）。章立ては `docs/DESIGN_DOCS.md` |
 | `builds/<build>.json` | 構成。どのスロットにどのカードを挿すか |
 | `pinspec/<型番>.json` | 一次資料を目視照合したピン情報（Collection の pinspec と同じ書式）。Collection に無い型番の分だけ置く |
-| `elec/<実型番>.json` | 一次資料を目視照合した電気特性（入力電流、出力電流、レベル、電源電流、遅延）。DR 資料の電気計算の出典 |
+| `elec/<実型番>.json` | 一次資料を目視照合した電気特性（入力電流、出力電流、レベル、電源電流、遅延）。DR 資料の電気計算の出典。同じ資料の同じ表で値が共通の型番は 1 ファイルにまとめる（例 `SN74284_SN74285.json`） |
 
 新しい型番が手に入ったときの流れ:
 
@@ -39,7 +39,7 @@
 
 `card.json` の書式は `cards/alu8/card.json` を見本にする。ネット名は ASCII、L アクティブ信号は `_n` を付ける。
 
-- `components`: IC は `part`（汎用型番。pinspec を引く）・`device`（採用実型番）・`datasheet`（URL。回路図の Datasheet 属性になる）・`pins`・`nc`（未接続ピン → 理由）。受動部品は `kind`（`R` / `C` / `CP`。CP は 1 番が +）・`value`・`pins`（1・2 番）。
+- `components`: IC は `part`（汎用型番。pinspec を引く）・`device`（採用実型番）・`datasheet`（URL。回路図の Datasheet 属性になる）・`pins`・`nc`（未接続ピン → 理由）。受動部品は `kind`（`R` / `C` / `CP`。CP は 1 番が +）・`value`・`pins`（1・2 番）。集合抵抗は `kind` が `RN`（共通端子型。1 番が共通端子、2 番以降が各素子で、ピン数は `pins` の数）。
 - `nets`: ネット → 用途の一文。`"A0..7"` のように範囲で書ける。配線表と回路図に出る。
 
 ## 状態
@@ -47,6 +47,7 @@
 - `reg8_574` は生成工程の実証用カード。コネクタの信号並びは暫定。
 - 74x181 / 74x182 / 74x89 / 74x284 / 74x285 は pinspec 作成済み（`hw/pinspec/`）。カードは `docs/design/SYSTEM.md`（システム設計の案）が承認されてから作る。
 - `alu8`（74S181 × 2 + 74S182）は draft。解説は `cards/alu8/DESIGN.md`。
-- 生成器は IC・受動部品（R / C / CP）・コネクタ・ネットの用途を扱う。LED と集合抵抗、`hw/system.json` の信号とカードのコネクタ信号の突き合わせ、電気特性（`hw/elec/`）による電流・レベルの計算は未対応で、使うカードを書く前に拡張する。
-- `sim/netlist.py` は `card.json` の配線どおりに IC モデルをつないで評価する（74x181 / 74x182 に対応。`sim/tests/test_cards.py`）。
+- `mul`（74284 + 74285、出力のプルアップは集合抵抗）は draft。解説は `cards/mul/DESIGN.md`。
+- 生成器は IC・受動部品（R / C / CP）・集合抵抗（RN）・コネクタ・ネットの用途を扱う。LED、`hw/system.json` の信号とカードのコネクタ信号の突き合わせ、電気特性（`hw/elec/`）による電流・レベルの計算は未対応で、使うカードを書く前に拡張する。
+- `sim/netlist.py` は `card.json` の配線どおりに IC モデルをつないで評価する（74x181 / 74x182 / 74x284 / 74x285 とプルアップに対応。`sim/tests/test_cards.py`）。
 - 74x141（K155ID1）は一次資料が未入手のため pinspec 未作成（`docs/REQUIREMENTS.md` の R9）。

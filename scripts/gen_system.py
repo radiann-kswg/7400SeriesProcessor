@@ -92,7 +92,8 @@ class System:
                 if not path.is_file():
                     raise DefError(f"構成の {slot}: カード定義 {a['card']} が無い")
                 devices = {c["device"] for c in json.loads(path.read_text(encoding="utf-8"))["components"] if c.get("device")}
-                if a.get("device") and a["device"] not in devices:
+                # 型番の違う IC を組で使う役割（MUL など）は "SN74284N / SN74285N" のように並べる
+                if a.get("device") and not set(a["device"].split(" / ")) <= devices:
                     raise DefError(f"構成の {slot}: 実型番 {a['device']} がカード定義 {a['card']} の device {sorted(devices)} と食い違う")
         if len(self.signals) != len(d["signals"]):
             raise DefError("信号名が重複している")

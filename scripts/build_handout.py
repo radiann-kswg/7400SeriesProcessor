@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """公開用の資料（handout）を PDF に組む。
 
-    python scripts/build_handout.py <名前> [--date YYYY-MM-DD] [--out DIR] [--chrome PATH] [--keep-html]
+    python scripts/build_handout.py <名前> [--date YYYY-MM-DD] [--out DIR] [--archive] [--chrome PATH] [--keep-html]
 
 docs/handouts/<名前>.json（構成ファイル）を読み、.temp/handouts/<名前>_<日付>.pdf を作る。
+--archive では <出力先>/<名前>.pdf を上書きし、前の版は <出力先>/.archive/<名前>_<その版の日付>.pdf へ移す
+（設計資料 PDF。AGENTS.md「設計資料の定期 PDF」）。
 構成ファイルの書き方と、書き下ろしの章で正本を取り込む `<!-- include: ... -->` は docs/handouts/README.md。
 
 要るもの: pandoc、Chrome か Edge（ヘッドレスの PDF 書き出し）。Python は標準ライブラリのみ。
@@ -29,6 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # 公開リポジトリの資料に載せないもの（AGENTS.md「公開範囲」）
 FORBIDDEN = ('.private/', 'collection/getstarting/', '.temp/')
 INCLUDE_RE = re.compile(r'^<!--\s*include:\s*(.*?)\s*-->[ \t]*$', re.M)
+MERMAID_RE = re.compile(r'^```mermaid[ \t]*\n.*?^```[ \t]*$', re.M | re.S)
 IMAGE_RE = re.compile(r'!\[([^\]]*)\]\(([^)\s]+)\)')
 IMAGE_REFERENCE_RE = re.compile(r'!\[([^\]]*)\](?:\[([^\]]*)\])?(?!\()')
 REFERENCE_DEF_RE = re.compile(r'^ {0,3}\[([^\]]+)\]:[ \t]*(?:<([^>\n]+)>|(\S+))', re.M)
@@ -147,6 +150,20 @@ def expand_include(spec: str, image_uris: set[str]) -> str:
 
 def expand_includes(md: str, image_uris: set[str]) -> str:
     return INCLUDE_RE.sub(lambda m: expand_include(m.group(1), image_uris), md)
+
+
+def replace_mermaid(md: str, figs: list[dict], base: Path, where: str) -> str:
+    """Mermaid のコードを、構成ファイルの mermaid に並べた図で上から順に差し替える（設計ルール 12）。"""
+    n = len(MERMAID_RE.findall(md))
+    if n != len(figs):
+        raise HandoutError(f'{where}: Mermaid の図が {n} 個、差し替える図（mermaid）が {len(figs)} 個')
+    it = iter(figs)
+
+    def sub(_):
+        f = next(it)
+        rel = os.path.relpath(repo_path(f['src']), base).replace(os.sep, '/')
+        return f'![{f["caption"]}]({rel})'
+    return MERMAID_RE.sub(sub, md)
 
 
 # ---------- Markdown → HTML ----------
@@ -347,7 +364,7 @@ def find_chrome(given: str | None) -> str:
     raise HandoutError('Chrome か Edge が見つからない（--chrome で指定する）')
 
 
-def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool) -> Path:
+def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool, archive: bool = False) -> Path:
     if shutil.which('pandoc') is None:
         raise HandoutError('pandoc が見つからない')
     conf = json.loads(read_text(repo_path(f'docs/handouts/{name}.json')))
@@ -371,7 +388,8 @@ def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool) 
                 title = title or first[2:].strip()
                 md = rest
             image_uris = set()
-            md = absolutize_images(expand_includes(md, image_uris), path.parent, image_uris=image_uris)
+            md = replace_mermaid(expand_includes(md, image_uris), ch.get('mermaid', []), path.parent, src)
+            md = absolutize_images(md, path.parent, image_uris=image_uris)
             body = pandoc(md, f'c{i}-', lua)
             validate_html_images(body, image_uris)
         elif kind == 'code':
@@ -413,15 +431,28 @@ def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool) 
     page = work / f'{name}.html'
     page.write_text(doc, encoding='utf-8')
 
-    pdf = (out / f'{name}_{date}.pdf').resolve()
+    # --archive: 組み上がってから前の版と入れ替える（失敗しても前の版は残る）
+    pdf = (work / f'{name}.pdf' if archive else out / f'{name}_{date}.pdf').resolve()
     cmd = [find_chrome(chrome), '--headless=new', '--disable-gpu', '--no-pdf-header-footer',
            '--generate-pdf-document-outline', f'--user-data-dir={(work / "chrome-profile").resolve()}',
            '--virtual-time-budget=10000', f'--print-to-pdf={pdf}', page.resolve().as_uri()]
     if os.name != 'nt' and hasattr(os, 'geteuid') and os.geteuid() == 0:
         cmd.insert(1, '--no-sandbox')
+    pdf.unlink(missing_ok=True)  # 前回の残りを今回の書き出しと取り違えない
     r = subprocess.run(cmd, capture_output=True)
     if r.returncode or not pdf.is_file():
         raise HandoutError('PDF の書き出しに失敗: ' + r.stderr.decode('utf-8', 'replace')[-800:])
+    if archive:
+        target, arc = out / f'{name}.pdf', out / '.archive'
+        stamp = arc / f'{name}.date'  # 今の版の表紙の日付（旧版の保存名に使う）
+        arc.mkdir(exist_ok=True)
+        if target.exists():
+            old = (stamp.read_text(encoding='utf-8').strip() if stamp.is_file()
+                   else datetime.date.fromtimestamp(target.stat().st_mtime).isoformat())  # 記録の無い版は更新日
+            os.replace(target, arc / f'{name}_{old}.pdf')  # 同じ日付の版は最後のものだけ残る
+        os.replace(pdf, target)
+        stamp.write_text(date, encoding='utf-8')
+        pdf = target.resolve()
     if not keep_html:
         shutil.rmtree(work, ignore_errors=True)
     return pdf
@@ -432,11 +463,13 @@ def main() -> int:
     ap.add_argument('name', help='構成ファイルの名前（docs/handouts/<名前>.json）')
     ap.add_argument('--date', default=datetime.date.today().isoformat(), help='表紙と頁の見出しの日付（既定は今日）')
     ap.add_argument('--out', default=str(ROOT / '.temp' / 'handouts'), help='出力先（既定は .temp/handouts）')
+    ap.add_argument('--archive', action='store_true',
+                    help='<出力先>/<名前>.pdf を上書きし、前の版を <出力先>/.archive/<名前>_<その版の日付>.pdf へ移す')
     ap.add_argument('--chrome', help='Chrome か Edge の実行ファイル（既定は自動で探す）')
     ap.add_argument('--keep-html', action='store_true', help='組版前の HTML と作業ファイルを残す')
     a = ap.parse_args()
     try:
-        pdf = build(a.name, a.date, Path(a.out), a.chrome, a.keep_html)
+        pdf = build(a.name, a.date, Path(a.out), a.chrome, a.keep_html, a.archive)
     except HandoutError as e:
         print(f'[error] {e}', file=sys.stderr)
         return 1

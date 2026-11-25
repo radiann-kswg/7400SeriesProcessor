@@ -1,0 +1,88 @@
+{
+  "device": "SN74284 / SN74285",
+  "part": "74x284 / 74x285",
+  "source": {
+    "file": "datasheets/_download/TI(TexasInstruments)/SN74/SN74284,SN74285.pdf",
+    "doc_id": "",
+    "revision": "May 1972 - Revised December 1983",
+    "pages": "3-925",
+    "checked": "2026-11-25",
+    "method": "PDF の該当頁を目視（collection/AGENTS.md の対話型ファクトチェック手順）",
+    "confidence": 95,
+    "url": "https://sapr.asvcorp.ru/datasheets/34/03/00000000334.pdf",
+    "url_note": "TI の原資料のミラー（TI 公式のホストではない）。資料に DocID の記載は無い",
+    "tables": "absolute maximum ratings / recommended operating conditions / electrical characteristics / switching characteristics"
+  },
+  "note": "SN74284 と SN74285 は同じ資料の同じ表で、値は共通",
+  "vcc_V": {
+    "min": 4.75,
+    "nom": 5,
+    "max": 5.25
+  },
+  "input": {
+    "VIH_min_V": 2.0,
+    "VIL_max_V": 0.8,
+    "abs_max_V": 5.5,
+    "VIK_max_V": -1.5,
+    "IIH_at": "VCC = MAX, VI = 2.4 V",
+    "IIL_at": "VCC = MAX, VI = 0.4 V",
+    "II_at_5_5V_mA": 1
+  },
+  "inputs": [
+    {
+      "pins": [
+        "1A",
+        "1B",
+        "1C",
+        "1D",
+        "2A",
+        "2B",
+        "2C",
+        "2D",
+        "GA",
+        "GB"
+      ],
+      "IIH_uA": 40,
+      "IIL_mA": -1
+    }
+  ],
+  "output": {
+    "type": "open_collector",
+    "VOH_max_V": 5.5,
+    "IOH_max_uA": 40,
+    "IOL_mA": 16,
+    "VOL_max_V": [
+      {
+        "IOL_mA": 12,
+        "V": 0.4
+      },
+      {
+        "IOL_mA": 16,
+        "V": 0.45
+      }
+    ],
+    "note": "IOH は出力オフで VOH 5.5 V のときの漏れ電流（VCC = MIN）。VOL は VCC = MIN のとき"
+  },
+  "icc_mA": {
+    "typ": 92,
+    "max": 130,
+    "note": "VCC = MAX、出力開放、GA・GB を GND に接続。High の出力を 3 ビット以上含む積と、4 ビットとも Low の積の両方で測った値（Note 2）"
+  },
+  "delay_ns": {
+    "condition": "VCC 5 V、TA 25 °C、CL 30 pF、RL1 300 Ω（VCC へ）、RL2 600 Ω（GND へ）。最小値の規定は無い",
+    "paths": [
+      {
+        "from": "GA, GB",
+        "to": "Y",
+        "typ": 20,
+        "max": 30
+      },
+      {
+        "from": "1A〜1D, 2A〜2D（語入力）",
+        "to": "Y",
+        "typ": 40,
+        "max": 60
+      }
+    ]
+  }
+}

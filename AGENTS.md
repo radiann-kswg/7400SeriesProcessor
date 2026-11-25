@@ -94,7 +94,7 @@ docs/                     要件・アーキテクチャ・DR 資料の規格
 docs/design/              システム階層の DR 資料
 docs/design/generated/    システム階層の生成物（全体図・IC 一覧・信号辞書）
 docs/design/images/       閲覧用の図面（Claude Design で作図して書き出した PNG。設計ルール 12）
-docs/handouts/            公開用の資料（handout）の構成ファイルと書き下ろしの章。PDF は置かない
+docs/handouts/            公開用の資料（handout）と設計資料 PDF の構成ファイル、書き下ろしの章。PDF は置かない
 hw/system.json            システム階層の正本（ブロックとブロック間の信号）
 hw/slots.json             役割（スロット）定義と候補型番
 hw/cards/<card>/          カード定義 card.json、解説 DESIGN.md、生成物（WIRING.md / .kicad_sch / svg/）
@@ -154,6 +154,21 @@ DR や紹介に配る PDF は、リポジトリの Markdown・閲覧用の図面
 - 載せる図は、閲覧用の図面（設計ルール 12）と生成物の回路図だけ。公開範囲（上の節）を守る。スクリプトは `.private/`・`collection/getstarting/`・`.temp/` のパスを拒む。
 - 正本の見出し・表・行を変えたら、それを取り込む handout が組めるかを `build_handout.py` で確かめる（合わない `include` があると止まる）。pandoc の無い環境では、作業ログの「未了」に書いて、組める環境（Claude の Cowork など）に回す。
 
+## 設計資料の定期 PDF（Git 管理外）
+
+7400sCCP8 の設計と仕様を PDF（設計資料 PDF）に組み、設計が進むたびに組み直して `.private/docs-PDF/` に残す。ユーザーが通して読むための、その時点の写しで、DR 前の内容も含む。配らない（配るのは DR 済みの handout）。
+
+- 冊の分け方: 要件定義とシステム設計で 1 冊（構成ファイル `docs/handouts/7400sCCP8_design.json`）、カードごとに 1 冊（`docs/handouts/<カード名>.json`。そのカードの handout の構成ファイルを兼ねる）。まとめて 1 冊にはしない。構成ファイルが無ければ最初に組むときに作り、`docs/handouts/README.md` の一覧に足す。
+- 組み方は handout と同じで、`--archive` を付ける。`python3 scripts/build_handout.py <名前> --out .private/docs-PDF --archive` で `.private/docs-PDF/<名前>.pdf` を上書きし、前の版は `.private/docs-PDF/.archive/<名前>_<その版の日付>.pdf` へ移す（同じ日の版は最後のものだけ残る）。旧版は消さない。
+- 中身: 要件定義の冊は、本文に `README.md`・`docs/REQUIREMENTS.md`・`docs/ARCHITECTURE.md`・`docs/design/SYSTEM.md`・`docs/DESIGN_DOCS.md`、付録にシステム階層の生成物（IC 一覧・信号辞書など）と閲覧用の図面の一覧。表紙の「状態」には段階計画の段を書く。カードの冊は `DESIGN.md`・回路図・`WIRING.md`（あれば `verify.wl`）で、表紙の「状態」にはカードの `status` を書く。
+- 次のどれかを含む作業を終えたら、その作業の最後に該当する冊を組む。ユーザーが求めたときも組む。
+  1. `docs/REQUIREMENTS.md` の決定事項（D 番号）を足した・改めた、段階計画の段が進んだ、または `docs/ARCHITECTURE.md`・`docs/design/SYSTEM.md`・`hw/system.json` を変えた → 要件定義の冊。
+  2. カードを足した、またはカードの `card.json`・`DESIGN.md`・`status` を変えた → そのカードの冊（カードを足したら構成ファイルも作る）。
+- 取りこぼしを拾うため、作業の初めに `.private/docs-PDF/<名前>.pdf` の更新日（表紙の作成日）を冊ごとに見る。`git log --since=<その日付> -- <その冊の正本>`（要件定義の冊は上の 1 の文書、カードの冊は `hw/cards/<カード名>`）に履歴があれば、その作業の最後に組む。
+- 図は閲覧用の図面（設計ルール 12。Claude Design で作図した `docs/design/images/` の PNG）を優先する。表紙と章の頭の図（`cover_image`・`figure_before`）もここから選ぶ。章の中の Mermaid の図は、構成ファイルの `mermaid` で閲覧用の図面に差し替える（書き方は `docs/handouts/README.md`）。`docs/design/generated/` の図は、同じ内容の閲覧用の図面がまだ無い範囲にだけ使う。カードの回路図（`scripts/gen_card.py` の生成物）はそのまま載せる。
+- 閲覧用の図面が正本より古いとき（作業ログの「未了」に図面の更新が残っているなど）は、先に図面を直して書き出し直してから組む。図面を直せないエージェント（Claude 以外）は組まずに、作業ログの「未了」に「設計資料 PDF の組み直し（図面の更新待ち）」と書いて Claude に回す。pandoc か Chrome の無い環境でも、組まずに「未了」に書く。
+- PDF はコミットせず、Releases にも添付しない。載せるのは handout と同じく、リポジトリの文書と図だけ（公開範囲の節）。
+
 ## 作業ルール
 
 - 多数ファイルの生成・構成変更の前に計画を提示して合意を取る。変更量が 500 行を超えそうなら事前確認する。
@@ -190,4 +205,4 @@ DR や紹介に配る PDF は、リポジトリの Markdown・閲覧用の図面
 ### 公開範囲
 
 - このリポジトリは public。購入先・入手メモ・購入予定・採用していない手持ちの一覧、`collection/getstarting/` や `.private/` の内容、データシートの本文・図表の転載が入っていたら指摘する。
-- handout の PDF をコミットしていたら指摘する（Releases に添付する）。`docs/handouts/` の書き下ろしの章に、ほかの文書の表や節を写していたら指摘する（`include` で取り込む）。
+- handout や設計資料 PDF をコミットしていたら指摘する（handout は Releases に添付し、設計資料 PDF は `.private/docs-PDF/` に置く）。`docs/handouts/` の書き下ろしの章に、ほかの文書の表や節を写していたら指摘する（`include` で取り込む）。
