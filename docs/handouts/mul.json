@@ -1,0 +1,34 @@
+{
+  "title": "mul カード設計資料",
+  "subtitle": "乗算器カード（SN74284 + SN74285）— 回路図と配線表",
+  "cover_image": "docs/design/images/mul_context.png",
+  "status": "mul は draft（DR 待ち）。システム設計は承認済み",
+  "contents": "1 章 DESIGN.md、2 章 回路図、3 章 WIRING.md（リポジトリの文書と生成物）",
+  "note": "正本は hw/cards/mul/card.json と hw/system.json で、この PDF はその時点の写し。清書図は Claude Design で作図したもので、正本と食い違ったら正本を正とする。",
+  "chapters": [
+    {
+      "num": "1",
+      "md": "hw/cards/mul/DESIGN.md",
+      "figure_before": {
+        "src": "docs/design/images/mul_context.png",
+        "caption": "図 1-1　mul とつながるカードと中の構成（清書図）"
+      }
+    },
+    {
+      "num": "2",
+      "title": "回路図",
+      "schematic": "hw/cards/mul/svg/mul.svg",
+      "source_label": "hw/cards/mul/svg/mul.svg（scripts/gen_card.py の生成物）",
+      "note": "KiCad の回路図（描いてある範囲を A3 横に拡大）。PDF は拡大して読めるベクタ。IC の箱は実物の DIP と同じピン並び（左列が 1 番から下へ、右列が下から上へ）。ピンごとの表は 3 章。"
+    },
+    {
+      "num": "3",
+      "md": "hw/cards/mul/WIRING.md",
+      "source_label": "hw/cards/mul/WIRING.md（scripts/gen_card.py の生成物）",
+      "figure_before": {
+        "src": "docs/design/images/mul_j1.png",
+        "caption": "図 3-1　接続口 J1 の並び（暫定。清書図）"
+      }
+    }
+  ]
+}

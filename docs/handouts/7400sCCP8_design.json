@@ -1,0 +1,51 @@
+{
+  "title": "7400sCCP8 設計資料",
+  "subtitle": "7400 シリーズ IC による自作 8bit CPU — 要件・アーキテクチャ・システム設計",
+  "cover_image": "docs/design/images/arch_boards.png",
+  "status": "Phase 2（詳細設計）。要件・命令セット・システム設計は承認済み（D46、2026-11-23）。カードの回路設計はカードごとの設計資料に分ける",
+  "contents": "README / REQUIREMENTS / ARCHITECTURE / SYSTEM / DESIGN_DOCS、付録にシステム階層の生成物と閲覧用の図面の一覧",
+  "note": "各章はリポジトリの Markdown をそのまま組版したもの。正本は hw/*.json と各 Markdown で、この PDF はその時点の写し。図は Claude Design で作図した閲覧用の図面を優先し（Mermaid の図は差し替え）、正本と食い違ったら正本を正とする。",
+  "chapters": [
+    {
+      "num": "1",
+      "md": "README.md"
+    },
+    {
+      "num": "2",
+      "md": "docs/REQUIREMENTS.md"
+    },
+    {
+      "num": "3",
+      "md": "docs/ARCHITECTURE.md",
+      "mermaid": [
+        {
+          "src": "docs/design/images/arch_datapath.png",
+          "caption": "図 3-1　データの流れ（IC 単位の清書図。Mermaid の概念図に代えて掲載）"
+        },
+        {
+          "src": "docs/design/images/arch_nixie.png",
+          "caption": "図 3-2　ニキシー表示（概念図。清書図）"
+        }
+      ]
+    },
+    {
+      "num": "4",
+      "md": "docs/design/SYSTEM.md"
+    },
+    {
+      "num": "5",
+      "md": "docs/DESIGN_DOCS.md"
+    },
+    {
+      "num": "付録 A",
+      "title": "システム階層の生成物",
+      "md": "docs/handouts/7400sCCP8_design/generated.md",
+      "source_label": "書き下ろし（一覧は docs/design/generated/README.md から取り込み、図は閲覧用の図面）"
+    },
+    {
+      "num": "付録 B",
+      "title": "閲覧用の図面の一覧",
+      "md": "docs/design/images/README.md"
+    }
+  ]
+}

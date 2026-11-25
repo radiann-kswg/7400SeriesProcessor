@@ -1,0 +1,21 @@
+{
+  "title": "reg8_574 カード設計資料",
+  "subtitle": "8bit レジスタカード（SN74ABT574A）— 回路図生成工程の実証カード。既定の構成では io 基板の出力ポート 0",
+  "status": "reg8_574 は draft。カード階層の解説（DESIGN.md）は未作成で、接続口の信号並びは暫定",
+  "contents": "1 章 回路図、2 章 WIRING.md（リポジトリの生成物）",
+  "note": "正本は hw/cards/reg8_574/card.json で、この PDF はその時点の写し。このカードの閲覧用の図面はまだ無い。",
+  "chapters": [
+    {
+      "num": "1",
+      "title": "回路図",
+      "schematic": "hw/cards/reg8_574/svg/reg8_574.svg",
+      "source_label": "hw/cards/reg8_574/svg/reg8_574.svg（scripts/gen_card.py の生成物）",
+      "note": "KiCad の回路図（描いてある範囲を A3 横に拡大）。PDF は拡大して読めるベクタ。IC の箱は実物の DIP と同じピン並び（左列が 1 番から下へ、右列が下から上へ）。ピンごとの表は 2 章。"
+    },
+    {
+      "num": "2",
+      "md": "hw/cards/reg8_574/WIRING.md",
+      "source_label": "hw/cards/reg8_574/WIRING.md（scripts/gen_card.py の生成物）"
+    }
+  ]
+}
