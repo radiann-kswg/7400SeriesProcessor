@@ -16,5 +16,9 @@
 | `alu8_context.png` | alu8 カードとつながるカード（信号と確定期限） | `hw/cards/alu8/DESIGN.md` 1 章・6 章、`hw/system.json` の signals |
 | `alu8_carry.png` | alu8 の中の桁上げの流れ（U1 → U3 → U2、ピン番号つき） | `hw/cards/alu8/card.json`、`DESIGN.md` 2〜4 章 |
 | `alu8_j1.png` | alu8 の接続口 J1（暫定）の並び | `hw/cards/alu8/card.json` の connector、`DESIGN.md` 3 章 |
+| `mul_context.png` | mul カードとつながるカード、中の構成（U1・U2 に同じ 2 語、RN1 のプルアップ） | `hw/cards/mul/card.json`、`DESIGN.md` 1〜3 章・6 章 |
+| `mul_j1.png` | mul の接続口 J1（暫定）の並び | `hw/cards/mul/card.json` の connector、`DESIGN.md` 3 章 |
 
 書き出し: 2026-11-23。`hw/system.json` v0.3（ブロック 53・信号 64・LED 85）に対応。`arch_phase.png`・`arch_leds.png`・`arch_boards.png` は D29 の改訂（位相 LED を Q1 = 赤・Q2 = 緑で点け、T2 黄・T3 緑。駆動は LED-PH）に合わせて同日に書き出し直した。`alu8_*.png` の 3 枚は同日、`hw/cards/alu8/card.json`（a6a88ae 時点）から作図した。
+
+`mul_*.png` の 2 枚は 2026-11-25 に `hw/cards/mul/card.json` から作図し、書き出した（キャンバスの MulContext・MulJ1）。
