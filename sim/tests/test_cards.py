@@ -27,5 +27,15 @@ class TestAlu8Card(unittest.TestCase):
                         self.assertEqual((f, v["COUT_n"]), (want_f, 1 - want_c), (a, b, s, m, cn_n))
 
 
+class TestMulCard(unittest.TestCase):
+    def test_matches_machine_multiply(self):
+        card = Card("mul")
+        for a in range(16):
+            for b in range(16):
+                v = card.eval({**bits("A", a, 4), **bits("B", b, 4)})
+                p = sum(v[f"P{i}"] << i for i in range(8))
+                self.assertEqual(p, Machine.multiply(a, b), (a, b))
+
+
 if __name__ == "__main__":
     unittest.main()

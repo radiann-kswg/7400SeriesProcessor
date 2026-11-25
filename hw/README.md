@@ -47,6 +47,7 @@
 - `reg8_574` は生成工程の実証用カード。コネクタの信号並びは暫定。
 - 74x181 / 74x182 / 74x89 / 74x284 / 74x285 は pinspec 作成済み（`hw/pinspec/`）。カードは `docs/design/SYSTEM.md`（システム設計の案）が承認されてから作る。
 - `alu8`（74S181 × 2 + 74S182）は draft。解説は `cards/alu8/DESIGN.md`。
+- `mul`（74284 + 74285、出力のプルアップは集合抵抗）は draft。解説は `cards/mul/DESIGN.md`。
 - 生成器は IC・受動部品（R / C / CP）・集合抵抗（RN）・コネクタ・ネットの用途を扱う。LED、`hw/system.json` の信号とカードのコネクタ信号の突き合わせ、電気特性（`hw/elec/`）による電流・レベルの計算は未対応で、使うカードを書く前に拡張する。
-- `sim/netlist.py` は `card.json` の配線どおりに IC モデルをつないで評価する（74x181 / 74x182 に対応。`sim/tests/test_cards.py`）。
+- `sim/netlist.py` は `card.json` の配線どおりに IC モデルをつないで評価する（74x181 / 74x182 / 74x284 / 74x285 とプルアップに対応。`sim/tests/test_cards.py`）。
 - 74x141（K155ID1）は一次資料が未入手のため pinspec 未作成（`docs/REQUIREMENTS.md` の R9）。
