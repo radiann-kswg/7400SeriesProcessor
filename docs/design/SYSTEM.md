@@ -191,7 +191,7 @@ A バスには出力ポートの入力電流がさらに加わる。
 | SN74S181 | SDLS136（1972-12、1988-03 改訂）8 頁・9 頁 | IIL: M −2 mA、A・B −6 mA、S −8 mA、Cn −10 mA。IIH: 50 / 150 / 200 / 250 µA。IOL 20 mA、IOH −1 mA。VOH 2.7 V 以上・VOL 0.5 V 以下。ICC 代表 120 mA・最大 220 mA。遅延（最大）: A・B → F 22 ns、A・B → G・P 15 ns、Cn → F 12 ns |
 | SN74S182 | SDLS206（1972-12、1988-03 改訂）4 頁 | IIL: Cn −2 mA、P0 −8 mA、G0 −14 mA（ほか P1 −8、P2 −6、P3 −4、G1 −16、G2 −14、G3 −8 mA）。IIH（VI 2.7 V）: Cn 50、P3 100、P2 150、P0・P1・G3 200、G0・G2 350、G1 400 µA。IOL 20 mA、IOH −1 mA。VOH 2.7 V 以上・VOL 0.5 V 以下。ICCH 代表 35 mA・最大 70 mA、ICCL 代表 69 mA・最大 109 mA。遅延（最大）: P・G → Cn+x 7 ns、Cn → Cn+x 10.5 ns |
 | SN7489 | D1416（1972-12、1984-02 改訂）5-3 頁・5-5 頁・5-6 頁 | 機能表（書き込み中の出力はデータ入力の反転）。書き込みパルス幅 40 ns、データのセットアップ 40 ns・ホールド 5 ns、番地のセットアップ 0 ns・ホールド 5 ns。IIL −1.6 mA、IIH 40 µA、VOL 0.4 V（IOL 12 mA）、ICC 代表 75 mA・最大 105 mA。番地 → 出力 最大 60 ns |
-| SN74284 / SN74285 | TI の資料（1972-05、1983-12 改訂。DocID の記載なし）3-925 頁 | IIL −1 mA、IIH 40 µA、IOL 16 mA、出力耐圧 5.5 V。ICC 代表 92 mA・最大 130 mA。語入力 → 出力 最大 60 ns |
+| SN74284 / SN74285 | TI の資料（1972-05、1983-12 改訂。DocID の記載なし）3-925 頁（2026-11-25 に再び目視し、`hw/elec/SN74284_SN74285.json` に記録） | IIL −1 mA（0.4 V）、IIH 40 µA（2.4 V）、IOL 16 mA、VOL 0.4 V（12 mA）・0.45 V（16 mA）、出力オフの漏れ 40 µA・出力耐圧 5.5 V。ICC 代表 92 mA・最大 130 mA。語入力 → 出力 最大 60 ns、出力有効 → 出力 最大 30 ns |
 | AS6C62256-55PCN | Alliance Memory AS6C62256 Rev 1.2（2016-03-23）2〜4 頁・7 頁・11 頁 | 2.7〜5.5 V、600 mil PDIP。VIH 最小 2.4 V・VIL 最大 0.6 V、VOH 2.4 V（−1 mA）・VOL 0.4 V（2 mA）。tAA 55 ns、tOE 30 ns、tWP 45 ns、tDW 25 ns、tAS・tWR・tDH 0 ns。ICC 最大 45 mA。データ保持 1.5 V 以上（CE# ≥ VCC − 0.2 V）、IDR 最大 20 µA |
 | AS6C6264-55PCN | Alliance Memory AS6C6264 v2.0（2017-07）2〜4 頁・7 頁・11 頁 | 62256 と同じ電圧・タイミング。1 番 NC、26 番 CE2（H で選択）。データ保持は CE# ≥ VCC − 0.2 V または CE2 ≤ 0.2 V、IDR 最大 10 µA |
 
