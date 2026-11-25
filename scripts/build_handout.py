@@ -438,16 +438,20 @@ def build(name: str, date: str, out: Path, chrome: str | None, keep_html: bool, 
            '--virtual-time-budget=10000', f'--print-to-pdf={pdf}', page.resolve().as_uri()]
     if os.name != 'nt' and hasattr(os, 'geteuid') and os.geteuid() == 0:
         cmd.insert(1, '--no-sandbox')
+    pdf.unlink(missing_ok=True)  # 前回の残りを今回の書き出しと取り違えない
     r = subprocess.run(cmd, capture_output=True)
     if r.returncode or not pdf.is_file():
         raise HandoutError('PDF の書き出しに失敗: ' + r.stderr.decode('utf-8', 'replace')[-800:])
     if archive:
-        target = out / f'{name}.pdf'
+        target, arc = out / f'{name}.pdf', out / '.archive'
+        stamp = arc / f'{name}.date'  # 今の版の表紙の日付（旧版の保存名に使う）
+        arc.mkdir(exist_ok=True)
         if target.exists():
-            old = datetime.date.fromtimestamp(target.stat().st_mtime).isoformat()
-            (out / '.archive').mkdir(exist_ok=True)
-            os.replace(target, out / '.archive' / f'{name}_{old}.pdf')  # 同じ日の版は最後のものだけ残る
+            old = (stamp.read_text(encoding='utf-8').strip() if stamp.is_file()
+                   else datetime.date.fromtimestamp(target.stat().st_mtime).isoformat())  # 記録の無い版は更新日
+            os.replace(target, arc / f'{name}_{old}.pdf')  # 同じ日付の版は最後のものだけ残る
         os.replace(pdf, target)
+        stamp.write_text(date, encoding='utf-8')
         pdf = target.resolve()
     if not keep_html:
         shutil.rmtree(work, ignore_errors=True)

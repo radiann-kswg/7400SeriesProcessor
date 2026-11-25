@@ -2,7 +2,8 @@
 
 ピン番号 → ピン名は pinspec から引き、IC モデルにはピン名で値を渡す。組み合わせ回路だけを扱い、
 入力がそろった IC から順に評価する。VCC へのプルアップ抵抗（集合抵抗は共通端子が VCC のもの）がつながる
-ネットは、どの出力も駆動しなければ H とする。
+ネットは、どの出力もつながらなければ H とする。オープンコレクタ出力の 1 は解放として扱い、そのネットに
+プルアップがあれば H、無ければ誤りとする。出力のつながるネットは、その IC を評価してから値が決まる。
 """
 from __future__ import annotations
 
@@ -57,31 +58,42 @@ def _pinspec(part: str) -> dict:
 class Card:
     def __init__(self, name: str):
         data = json.loads((ROOT / "hw" / "cards" / name / "card.json").read_text(encoding="utf-8"))
-        self.ics, self.pullups = [], set()
+        self.ics, self.pullups, self.driven = [], set(), set()
         for c in data["components"]:
             if "kind" in c:
                 pins = c["pins"]  # R はどちらかの端子、RN（集合抵抗）は 1 番の共通端子が VCC のときプルアップ
                 if (c["kind"] == "R" and "VCC" in pins.values()) or (c["kind"] == "RN" and pins["1"] == "VCC"):
                     self.pullups |= set(pins.values()) - {"VCC"}
                 continue
-            names = {num: p["name"] for num, p in _pinspec(c["part"])["pins"].items()}
-            self.ics.append((MODELS[c["part"]], {names[num]: net for num, net in c["pins"].items()}))
+            spec = _pinspec(c["part"])["pins"]
+            pins = {spec[num]["name"]: net for num, net in c["pins"].items()}
+            oc = {spec[num]["name"] for num in c["pins"] if spec[num]["dir"] == "open_collector"}
+            self.driven |= {pins[spec[num]["name"]] for num in c["pins"]
+                            if spec[num]["dir"] in ("output", "open_collector", "tri_state")} - {"NC"}
+            self.ics.append((MODELS[c["part"]], pins, oc))
 
     def eval(self, inputs: dict[str, int]) -> dict[str, int]:
         """inputs（ネット名 → 0/1）を与え、全ネットの値を返す。"""
-        # プルアップのネットを先に H と置き、オープンコレクタ出力の値で上書きする
+        # 出力のつながらないプルアップのネットだけを先に H と置く（出力のつながるネットは駆動元の評価を待つ）
         # ponytail: 1 本のネットを複数のオープンコレクタ出力で共有する（ワイヤード AND）のは未対応
-        nets = {"VCC": 1, "GND": 0, **dict.fromkeys(self.pullups, 1), **inputs}
+        nets = {"VCC": 1, "GND": 0, **dict.fromkeys(self.pullups - self.driven, 1), **inputs}
         todo = self.ics
         while todo:
             left = []
-            for model, pins in todo:
+            for ic in todo:
+                model, pins, oc = ic
                 try:
                     out = model({p: nets[n] for p, n in pins.items() if n in nets})
                 except KeyError:  # 入力がまだそろっていない
-                    left.append((model, pins))
+                    left.append(ic)
                     continue
-                nets.update({pins[p]: v for p, v in out.items() if pins.get(p, "NC") != "NC"})
+                for p, v in out.items():
+                    n = pins.get(p, "NC")
+                    if n == "NC":
+                        continue
+                    if p in oc and v and n not in self.pullups:
+                        raise ValueError(f"オープンコレクタ出力 {p} のネット {n} にプルアップが無い")
+                    nets[n] = v
             if len(left) == len(todo):
                 raise ValueError("入力のそろわない IC が残った（未駆動のネットかループがある）")
             todo = left

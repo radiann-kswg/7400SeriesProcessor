@@ -36,6 +36,12 @@ class TestMulCard(unittest.TestCase):
                 p = sum(v[f"P{i}"] << i for i in range(8))
                 self.assertEqual(p, Machine.multiply(a, b), (a, b))
 
+    def test_open_collector_needs_pullup(self):
+        card = Card("mul")
+        card.pullups.clear()  # RN1 が無い配線
+        with self.assertRaises(ValueError):
+            card.eval({**bits("A", 15, 4), **bits("B", 15, 4)})
+
 
 if __name__ == "__main__":
     unittest.main()
